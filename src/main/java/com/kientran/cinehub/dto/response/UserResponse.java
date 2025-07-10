@@ -25,7 +25,4 @@ public class UserResponse {
 
     Set<UserRole> roles;
 
-    LocalDateTime createdAt;
-
-    LocalDateTime updatedAt;
 }

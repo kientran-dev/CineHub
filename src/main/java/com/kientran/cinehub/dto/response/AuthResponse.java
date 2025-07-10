@@ -11,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthResponse {
-    String accessToken; // Access Token
-    String refreshToken; // Refresh Token
-    String tokenType = "Bearer"; // Loại token
+    String accessToken;
+    String refreshToken;
+    String tokenType = "Bearer";
     String email;
 }

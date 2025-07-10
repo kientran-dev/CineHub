@@ -1,57 +1,49 @@
 package com.kientran.cinehub.config;
 
+import com.kientran.cinehub.security.JwtAuthenticationFilter;
+import com.kientran.cinehub.security.JwtService;
+import com.kientran.cinehub.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Sử dụng BCryptPasswordEncoder để mã hóa mật khẩu
         return new BCryptPasswordEncoder();
     }
-    // 2. Định nghĩa SecurityFilterChain
-    // Đây là nơi bạn cấu hình quy tắc bảo mật cho các HTTP request
+    // Định nghĩa AuthenticationManager - Quản lý quá trình xác thực
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+    // Cấu hình Authentication Provider để sử dụng CustomUserDetailsService và PasswordEncoder
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF (Cross-Site Request Forgery) protection
-                // Thường tắt cho các API RESTful vì chúng ta không dùng session-based authentication
-                // Trong ứng dụng web truyền thống, bạn nên bật nó.
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        // Cho phép endpoint đăng ký công khai (public)
-                        // Bất kỳ request nào đến /api/auth/register đều không cần xác thực
-                        .requestMatchers("/api/auth/register").permitAll()
-                        // Cho phép truy cập công khai vào Swagger UI và các tài liệu API (nếu có)
+                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // Bất kỳ request nào khác đều yêu cầu xác thực
                         .anyRequest().authenticated()
-                );
-        // .httpBasic(withDefaults()); // Hoặc .formLogin(withDefaults()); nếu bạn muốn dùng cơ chế đăng nhập mặc định của Spring Security
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-    // Bạn sẽ cần định nghĩa UserDetailsService sau này để xử lý logic đăng nhập
-    // (Hiện tại chưa cần ngay để khắc phục lỗi 401 cho register)
-    // Ví dụ:
-    /*
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository) {
-        return email -> userRepository.findByEmail(email)
-            .map(user -> new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                user.getRoles().stream()
-                    .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
-                    .collect(Collectors.toList())
-            ))
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-    }
-    */
 }

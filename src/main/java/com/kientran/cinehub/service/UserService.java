@@ -49,11 +49,20 @@ public class UserService {
                 savedUser.getEmail(),
                 savedUser.getFirstName(),
                 savedUser.getLastName(),
-                savedUser.getRoles(),
-                savedUser.getCreatedAt(),
-                savedUser.getUpdatedAt()
+                savedUser.getRoles()
         );
     }
 
+    public UserResponse getUserResponseByEmail(String email) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRoles()
+        );
+    }
 }

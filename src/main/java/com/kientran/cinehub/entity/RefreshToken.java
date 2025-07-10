@@ -27,7 +27,7 @@ public class RefreshToken {
     Instant expiryDate;
 
     @Indexed(unique = true)
-    Long userId;
+    String userId;
 }
 
 

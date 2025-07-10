@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class BaseEntity implements Serializable {
 
     @Id
-    String id; // MongoDB tự động tạo _id nếu id là String hoặc ObjectId
+    String id;
 
     @CreatedDate
     @Field(name = "created_at")
