@@ -4,6 +4,7 @@ import com.kientran.cinehub.entity.RefreshToken;
 import com.kientran.cinehub.exception.RefreshTokenExpiredException;
 import com.kientran.cinehub.repository.RefreshTokenRepositoty;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefreshTokenService {
 
     private final RefreshTokenRepositoty refreshTokenRepositoty;
@@ -36,11 +38,10 @@ public class RefreshTokenService {
             refreshToken.setToken(tokenString);
             refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenExpirationMs));
         }
-        return refreshTokenRepositoty.save(refreshToken);
-    }
+        RefreshToken savedToken = refreshTokenRepositoty.save(refreshToken);
+        log.info("Saved RefreshToken with ID: {} and User ID: {}", savedToken.getId(), savedToken.getUserId()); // <-- THÊM DÒNG LOG NÀY
 
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepositoty.findByToken(token);
+        return savedToken;
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
@@ -52,5 +53,8 @@ public class RefreshTokenService {
     }
     public void deleteByUserId(String userId) {
         refreshTokenRepositoty.deleteByUserId(userId);
+    }
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepositoty.findByToken(token);
     }
 }

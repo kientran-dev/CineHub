@@ -11,7 +11,8 @@ spring:
         springframework:
           data:
             mongodb: INFO
-        mongodb: INFO
+      com: # Thêm cấu hình log cho gói của bạn
+        kientran: INFO
 
 tmdb:
   api:

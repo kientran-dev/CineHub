@@ -65,4 +65,16 @@ public class UserService {
                 user.getRoles()
         );
     }
+
+    public UserResponse getUserResponseById(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRoles()
+        );
+    }
 }

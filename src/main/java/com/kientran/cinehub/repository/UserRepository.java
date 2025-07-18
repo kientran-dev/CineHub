@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends MongoRepository<User, Long> {
+public interface UserRepository extends MongoRepository<User, String> {
 
     // Tìm người dùng theo vai trò (ví dụ: tìm tất cả ADMIN hoặc MODERATOR)
     List<User> findByRolesContaining(UserRole role);

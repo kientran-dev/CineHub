@@ -4,11 +4,13 @@ import com.kientran.cinehub.dto.request.LoginRequest;
 import com.kientran.cinehub.dto.request.UserRegistrationRequest;
 import com.kientran.cinehub.dto.response.AuthResponse;
 import com.kientran.cinehub.dto.response.UserResponse;
+import com.kientran.cinehub.entity.RefreshToken;
 import com.kientran.cinehub.security.JwtService;
 import com.kientran.cinehub.service.RefreshTokenService;
 import com.kientran.cinehub.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
@@ -41,15 +44,27 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
+        log.info("Received login request for email: {}", request.getEmail());
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         UserResponse userResponse = userService.getUserResponseByEmail(userDetails.getUsername());
 
         String accessToken = jwtService.generateAccessToken(userResponse);
         String refreshToken = jwtService.generateRefreshToken(userResponse);
-
-        refreshTokenService.createRefreshToken(userResponse.getId(), refreshToken);
-
         AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "Bearer", userResponse.getEmail());
         return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody String refreshToken) {
+        log.info("Received refresh token request.");
+        return refreshTokenService.findByToken(refreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(token -> {
+                    UserResponse userResponse = userService.getUserResponseById(token.getUserId());
+                    String newAccessToken = jwtService.generateAccessToken(userResponse);
+                    return new AuthResponse(newAccessToken, refreshToken, "Bearer", userResponse.getEmail());
+                })
+                .map(authResponse -> new ResponseEntity<>(authResponse, HttpStatus.OK))
+                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 }
