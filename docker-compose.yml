@@ -5,19 +5,20 @@ services:
     build: .
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/cinehub_db
-      - JWT_SECRET={JWT_SECRET}
-      - TMDB_API_KEY={API_KEY}
-    depends_on:
-      - mongodb
-
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-
-volumes:
-  mongodb_data:
+    environment: #host.docker.internal:27017 đang xây dụng app thì dùng db local đã
+      - SPRING_DATA_MONGODB_URI=mongodb://host.docker.internal:27017/cinehub_db
+      - JWT_SECRET=${JWT_SECRET}
+      - TMDB_API_KEY=${API_KEY}
+#Sau khi hoàn thiện db thì sẽ containerlize cái mongodb này sau hehee
+#    depends_on:
+#      - mongodb
+#
+#  mongodb:
+#    image: mongo:latest
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - mongodb_data:/data/db
+#
+#volumes:
+#  mongodb_data:

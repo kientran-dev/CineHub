@@ -22,6 +22,6 @@ tmdb:
     base-url: https://image.tmdb.org/t/p/
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: 4a5c0d5096d722509cf26a3c621b5770810c5bfc233a02e953f3d299c4335148
   access-token-expiration-ms: 300000
   refresh-token-expiration-ms: 604800000

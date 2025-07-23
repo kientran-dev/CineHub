@@ -50,6 +50,7 @@ public class AuthController {
 
         String accessToken = jwtService.generateAccessToken(userResponse);
         String refreshToken = jwtService.generateRefreshToken(userResponse);
+
         AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "Bearer", userResponse.getEmail());
         return ResponseEntity.ok(authResponse);
     }

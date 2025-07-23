@@ -27,12 +27,10 @@ public class RefreshTokenService {
 
         RefreshToken refreshToken;
         if (existingToken.isPresent()) {
-            // Nếu đã có, cập nhật token và thời gian hết hạn
             refreshToken = existingToken.get();
-            refreshToken.setToken(tokenString); // Cập nhật token mới
+            refreshToken.setToken(tokenString);
             refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenExpirationMs));
         } else {
-            // Nếu chưa có, tạo mới
             refreshToken = new RefreshToken();
             refreshToken.setUserId(userId);
             refreshToken.setToken(tokenString);
