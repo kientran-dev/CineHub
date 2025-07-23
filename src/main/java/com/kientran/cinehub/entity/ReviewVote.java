@@ -1,29 +1,27 @@
 package com.kientran.cinehub.entity;
 
+import com.kientran.cinehub.enums.VoteType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "genres")
+@Document(collection = "review_votes")
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Genre extends BaseEntity {
+public class ReviewVote extends BaseEntity {
 
-    @Field(name = "name_vi")
-    String nameVi; // "Hành động", "Tâm lý", "Hài hước"
+    @Field(name = "user_id")
+    String userId;
 
-    @Field(name = "description")
-    String description;
+    @Field(name = "review_id")
+    String reviewId;
 
-    @Field(name = "is_active")
-    Boolean isActive = true;
-
-    @Field(name = "sort_order")
-    Integer sortOrder = 0; // Thứ tự hiển thị
+    @Field(name = "vote_type")
+    VoteType voteType; // UPVOTE or DOWNVOTE
 }

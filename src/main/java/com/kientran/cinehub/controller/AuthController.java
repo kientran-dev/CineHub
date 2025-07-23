@@ -4,10 +4,10 @@ import com.kientran.cinehub.dto.request.LoginRequest;
 import com.kientran.cinehub.dto.request.UserRegistrationRequest;
 import com.kientran.cinehub.dto.response.AuthResponse;
 import com.kientran.cinehub.dto.response.UserResponse;
-import com.kientran.cinehub.entity.RefreshToken;
 import com.kientran.cinehub.security.JwtService;
 import com.kientran.cinehub.service.RefreshTokenService;
 import com.kientran.cinehub.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,14 +43,12 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-
-        log.info("Received login request for email: {}", request.getEmail());
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         UserResponse userResponse = userService.getUserResponseByEmail(userDetails.getUsername());
 
         String accessToken = jwtService.generateAccessToken(userResponse);
         String refreshToken = jwtService.generateRefreshToken(userResponse);
-
+        refreshTokenService.createRefreshToken(userResponse.getId(), refreshToken);
         AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "Bearer", userResponse.getEmail());
         return ResponseEntity.ok(authResponse);
     }
@@ -67,5 +65,30 @@ public class AuthController {
                 })
                 .map(authResponse -> new ResponseEntity<>(authResponse, HttpStatus.OK))
                 .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        try {
+            // Lấy token từ header Authorization
+            final String authHeader = request.getHeader("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest().body("Token không hợp lệ");
+            }
+            final String jwt = authHeader.substring(7);
+            String userEmail = jwtService.extractUserEmail(jwt);
+
+            if (userEmail != null) {
+                UserResponse userResponse = userService.getUserResponseByEmail(userEmail);
+                refreshTokenService.deleteByUserId(userResponse.getId());
+                return ResponseEntity.ok("Logout thành công");
+            } else {
+                return ResponseEntity.badRequest().body("Token không hợp lệ");
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Có lỗi xảy ra khi logout");
+        }
     }
 }

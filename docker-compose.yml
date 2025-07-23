@@ -5,6 +5,7 @@ services:
     build: .
     ports:
       - "8080:8080"
+    container_name: cinehub_app
     environment: #host.docker.internal:27017 đang xây dụng app thì dùng db local đã
       - SPRING_DATA_MONGODB_URI=mongodb://host.docker.internal:27017/cinehub_db
       - JWT_SECRET=${JWT_SECRET}
@@ -15,6 +16,7 @@ services:
 #
 #  mongodb:
 #    image: mongo:latest
+#    container_name: cinehub_db
 #    ports:
 #      - "27017:27017"
 #    volumes:

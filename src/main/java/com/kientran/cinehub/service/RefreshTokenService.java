@@ -37,8 +37,6 @@ public class RefreshTokenService {
             refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenExpirationMs));
         }
         RefreshToken savedToken = refreshTokenRepositoty.save(refreshToken);
-        log.info("Saved RefreshToken with ID: {} and User ID: {}", savedToken.getId(), savedToken.getUserId()); // <-- THÊM DÒNG LOG NÀY
-
         return savedToken;
     }
 
