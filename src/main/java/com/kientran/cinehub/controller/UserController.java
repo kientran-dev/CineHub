@@ -1,5 +1,6 @@
 package com.kientran.cinehub.controller;
 
+import com.kientran.cinehub.dto.request.ChangePasswordRequest;
 import com.kientran.cinehub.dto.request.UpdateProfileRequest;
 import com.kientran.cinehub.dto.response.UserResponse;
 import com.kientran.cinehub.service.UserService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -32,4 +34,5 @@ public class UserController {
         UserResponse updatedUser = userService.updateUserProfile(request);
         return ResponseEntity.ok(updatedUser);
     }
+
 }
