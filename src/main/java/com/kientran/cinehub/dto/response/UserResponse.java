@@ -1,16 +1,12 @@
 package com.kientran.cinehub.dto.response;
 
 import com.kientran.cinehub.enums.UserRole;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -22,6 +18,10 @@ public class UserResponse {
     String firstName;
 
     String lastName;
+
+    String avatarId;
+
+    String avatarUrl;
 
     Set<UserRole> roles;
 

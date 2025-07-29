@@ -35,6 +35,9 @@ public class User extends BaseEntity{
     @Field(name = "last_name")
     String lastName;
 
+    @Field(name = "avatar_id")
+    String avatarId;
+
     @Field(name = "roles")
     Set<UserRole> roles = new HashSet<>();
 }
