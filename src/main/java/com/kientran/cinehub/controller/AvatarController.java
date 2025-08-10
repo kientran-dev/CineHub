@@ -1,7 +1,9 @@
 package com.kientran.cinehub.controller;
 
 import com.kientran.cinehub.service.AvatarService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,9 +12,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/avatars")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AvatarController {
 
-    private final AvatarService avatarService;
+    AvatarService avatarService;
 
     /**
      * Lấy danh sách tất cả avatar có sẵn
