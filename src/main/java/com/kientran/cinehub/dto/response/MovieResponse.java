@@ -3,6 +3,7 @@ package com.kientran.cinehub.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -17,11 +18,17 @@ public class MovieResponse {
     String englishTitle;
     String thumbnail;
     String poster;
+    String description;
     String director;
     Integer releaseYear;
+    Integer duration;
     String country;
     String status;
     String type;
-    Double imdb;
+    Double imdbScore;
+    Double averageRating;
+    Integer totalRatings;
     Set<GenreResponse> genres;
-}
+    List<EpisodeResponse> episodes;
+    List<ActorResponse> actors;
+}

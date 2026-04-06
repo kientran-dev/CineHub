@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GenreRequest {
-    String name;
+public class EpisodeRequest {
+    Long movieId;
+    Integer episodeNumber;
+    String episodeName;
 }

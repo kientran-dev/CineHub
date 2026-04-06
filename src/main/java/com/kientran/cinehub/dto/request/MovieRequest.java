@@ -3,8 +3,6 @@ package com.kientran.cinehub.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +19,5 @@ public class MovieRequest {
     String country;
     String status;
     String type;
-    Double imdb;
-    Set<Long> genreIds;
+    Double imdbScore;
 }

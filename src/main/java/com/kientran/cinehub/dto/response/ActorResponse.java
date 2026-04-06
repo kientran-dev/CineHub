@@ -1,4 +1,4 @@
-package com.kientran.cinehub.dto.request;
+package com.kientran.cinehub.dto.response;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GenreRequest {
-    String name;
+public class ActorResponse {
+    Long id;
+    String fullName;
+    String imageUrl;
 }

@@ -8,7 +8,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,15 +19,18 @@ public class GenreService {
 
     GenreRepository genreRepository;
 
-    @Transactional
     public GenreResponse createGenre(GenreRequest request) {
-        if (genreRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Thể loại này đã tồn tại");
-        }
         Genre genre = Genre.builder()
                 .name(request.getName())
                 .build();
-        return mapToResponse(genreRepository.save(genre));
+        genre = genreRepository.save(genre);
+        return mapToResponse(genre);
+    }
+
+    public GenreResponse getGenreById(Long id) {
+        Genre genre = genreRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Genre not found"));
+        return mapToResponse(genre);
     }
 
     public List<GenreResponse> getAllGenres() {
@@ -37,31 +39,18 @@ public class GenreService {
                 .collect(Collectors.toList());
     }
 
-    public GenreResponse getGenreById(Long id) {
-        return genreRepository.findById(id)
-                .map(this::mapToResponse)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
-    }
-
-    @Transactional
     public GenreResponse updateGenre(Long id, GenreRequest request) {
         Genre genre = genreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
-
-        if (!genre.getName().equals(request.getName()) && genreRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Tên thể loại mới đã tồn tại");
-        }
-
+                .orElseThrow(() -> new RuntimeException("Genre not found"));
         genre.setName(request.getName());
-        return mapToResponse(genreRepository.save(genre));
+        genre = genreRepository.save(genre);
+        return mapToResponse(genre);
     }
 
-    @Transactional
     public void deleteGenre(Long id) {
         if (!genreRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy thể loại để xóa");
+            throw new RuntimeException("Genre not found");
         }
-        // Lưu ý: Trong thực tế cần kiểm tra xem có phim nào đang thuộc thể loại này không trước khi xóa
         genreRepository.deleteById(id);
     }
 

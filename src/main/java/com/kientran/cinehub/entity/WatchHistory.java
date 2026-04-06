@@ -29,6 +29,6 @@ public class WatchHistory extends BaseEntity{
     User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "episode_id", nullable = false)
-    Episode episode;
+    @JoinColumn(name = "episode_version_id", nullable = false)
+    EpisodeVersion episodeVersion;
 }

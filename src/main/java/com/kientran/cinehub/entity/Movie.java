@@ -63,6 +63,14 @@ public class Movie extends BaseEntity{
     )
     Set<Genre> genres;
 
+    @ManyToMany
+    @JoinTable(
+        name = "movie_actor",
+        joinColumns = @JoinColumn(name = "movie_id"),
+        inverseJoinColumns = @JoinColumn(name = "actor_id")
+    )
+    List<Actor> actors;
+
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> comments;
 
@@ -71,4 +79,4 @@ public class Movie extends BaseEntity{
     
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Favorite> favorites;
-}
+}

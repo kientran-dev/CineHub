@@ -8,12 +8,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GenreRequest {
-    String name;
+public class PaymentRequest {
+    Long premiumPackageId;
+    BigDecimal amount;
 }

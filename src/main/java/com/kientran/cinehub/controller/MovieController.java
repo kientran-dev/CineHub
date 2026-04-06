@@ -21,8 +21,8 @@ public class MovieController {
     MovieService movieService;
 
     @PostMapping
-    public ResponseEntity<MovieResponse> createMovie(@RequestBody MovieRequest requestDTO) {
-        return new ResponseEntity<>(movieService.createMovie(requestDTO), HttpStatus.CREATED);
+    public ResponseEntity<MovieResponse> createMovie(@RequestBody MovieRequest request) {
+        return new ResponseEntity<>(movieService.createMovie(request), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -36,8 +36,8 @@ public class MovieController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MovieResponse> updateMovie(@PathVariable Long id, @RequestBody MovieRequest requestDTO) {
-        return ResponseEntity.ok(movieService.updateMovie(id, requestDTO));
+    public ResponseEntity<MovieResponse> updateMovie(@PathVariable Long id, @RequestBody MovieRequest request) {
+        return ResponseEntity.ok(movieService.updateMovie(id, request));
     }
 
     @DeleteMapping("/{id}")

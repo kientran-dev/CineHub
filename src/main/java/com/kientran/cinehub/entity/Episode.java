@@ -25,12 +25,6 @@ public class Episode extends BaseEntity{
     @Column(name = "episode_name")
     String episodeName;
 
-    @Column(name = "video_url")
-    String videoUrl;
-
-    @Column(name = "server_name")
-    String serverName;
-
-    @OneToMany(mappedBy = "episode", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<WatchHistory> watchHistories;
+    @OneToMany(mappedBy = "episode")
+    List<EpisodeVersion> episodeVersions;
 }

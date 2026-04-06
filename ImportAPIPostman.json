@@ -1,0 +1,339 @@
+{
+  "info": {
+    "name": "CineHub Full API",
+    "description": "Bộ API đầy đủ cho các module: Movie, Genre, Episode, WatchHistory, User",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Movies",
+      "item": [
+        {
+          "name": "Get All Movies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies"]
+            }
+          }
+        },
+        {
+          "name": "Get Movie by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/movies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Movie",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Inception\",\n    \"englishTitle\": \"Inception\",\n    \"thumbnail\": \"https://example.com/thumb.jpg\",\n    \"poster\": \"https://example.com/poster.jpg\",\n    \"director\": \"Christopher Nolan\",\n    \"releaseYear\": 2010,\n    \"country\": \"USA\",\n    \"status\": \"RELEASED\",\n    \"type\": \"MOVIE\",\n    \"imdbScore\": 8.8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies"]
+            }
+          }
+        },
+        {
+          "name": "Update Movie",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Inception (Remastered)\",\n    \"englishTitle\": \"Inception\",\n    \"thumbnail\": \"https://example.com/thumb-updated.jpg\",\n    \"poster\": \"https://example.com/poster.jpg\",\n    \"director\": \"Christopher Nolan\",\n    \"releaseYear\": 2010,\n    \"country\": \"USA\",\n    \"status\": \"RELEASED\",\n    \"type\": \"MOVIE\",\n    \"imdbScore\": 9.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Movie",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/movies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Genres",
+      "item": [
+        {
+          "name": "Get All Genres",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/genres",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres"]
+            }
+          }
+        },
+        {
+          "name": "Get Genre by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/genres/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Genre",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Action\",\n    \"description\": \"Phim hành động\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/genres",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres"]
+            }
+          }
+        },
+        {
+          "name": "Update Genre",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Action & Adventure\",\n    \"description\": \"Phim hành động phiêu lưu\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/genres/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Genre",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/genres/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Episodes",
+      "item": [
+        {
+          "name": "Get All Episodes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/episodes",
+              "host": ["{{baseUrl}}"],
+              "path": ["episodes"]
+            }
+          }
+        },
+        {
+          "name": "Get Episode by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/episodes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["episodes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Episode",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 1,\n    \"title\": \"Tập 1\",\n    \"episodeNumber\": 1,\n    \"videoUrl\": \"https://example.com/video1.mp4\",\n    \"duration\": 2700\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/episodes",
+              "host": ["{{baseUrl}}"],
+              "path": ["episodes"]
+            }
+          }
+        },
+        {
+          "name": "Update Episode",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"movieId\": 1,\n    \"title\": \"Tập 1 (HD)\",\n    \"episodeNumber\": 1,\n    \"videoUrl\": \"https://example.com/video1-hd.mp4\",\n    \"duration\": 2750\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/episodes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["episodes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Episode",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/episodes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["episodes", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\",\n    \"email\": \"testuser@example.com\",\n    \"fullName\": \"Nguyen Van Test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"newemail@example.com\",\n    \"fullName\": \"Nguyen Van Update\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Watch History",
+      "item": [
+        {
+          "name": "Get Watch History by User",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/watch-history/user/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["watch-history", "user", "1"]
+            }
+          }
+        },
+        {
+          "name": "Save Watch History",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"userId\": 1,\n    \"episodeId\": 1,\n    \"progressTime\": 1250,\n    \"isCompleted\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/watch-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["watch-history"]
+            }
+          }
+        },
+        {
+          "name": "Clear Watch History",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/watch-history/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["watch-history", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

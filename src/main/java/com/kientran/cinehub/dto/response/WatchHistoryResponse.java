@@ -8,13 +8,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GenreResponse {
+public class WatchHistoryResponse {
     Long id;
-    String name;
+    Long episodeVersionId;
+    Long episodeId;
+    String movieTitle;
+    String episodeName;
+    String versionType;
+    Integer watchTime;
+    Integer currentEpisode;
+    LocalDateTime watchDate;
 }
