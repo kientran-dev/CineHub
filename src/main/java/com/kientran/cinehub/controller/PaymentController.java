@@ -4,6 +4,7 @@ import com.kientran.cinehub.dto.request.PaymentRequest;
 import com.kientran.cinehub.dto.response.PaymentResponse;
 import com.kientran.cinehub.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -30,8 +33,13 @@ public class PaymentController {
     }
 
     @GetMapping("/vnpay-return")
-    public ResponseEntity<PaymentResponse> vnpayCallback(HttpServletRequest request) {
-        // This endpoint will be called by VNPay after user payment
-        return ResponseEntity.ok(paymentService.processPaymentCallback(request));
+    public void vnpayCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        PaymentResponse result = paymentService.processPaymentCallback(request);
+        if ("SUCCESS".equals(result.getStatus())) {
+            // Thanh toán thành công, chuyển hướng về trang profile hoặc trang thông báo
+            response.sendRedirect("http://localhost:5173/profile?payment=success");
+        } else {
+            response.sendRedirect("http://localhost:5173/profile?payment=failed");
+        }
     }
 }

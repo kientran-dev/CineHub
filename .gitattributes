@@ -1,2 +1,27 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
+# Bảo mật thông tin quan trọng (VNPay secret, JWT secret)
+.env
+
+# Java & Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven Wrapper
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE (IntelliJ, Eclipse, VSCode)
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db

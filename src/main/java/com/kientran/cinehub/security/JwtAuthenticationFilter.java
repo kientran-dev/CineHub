@@ -39,7 +39,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        username = jwtService.extractUsername(jwt);
+
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token expired\", \"message\": \"Access token đã hết hạn, vui lòng refresh token\"}");
+            return;
+        } catch (io.jsonwebtoken.JwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Invalid token\", \"message\": \"Token không hợp lệ\"}");
+            return;
+        }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);

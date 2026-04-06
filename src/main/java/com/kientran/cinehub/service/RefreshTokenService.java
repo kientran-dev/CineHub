@@ -3,6 +3,7 @@ package com.kientran.cinehub.service;
 import com.kientran.cinehub.entity.RefreshToken;
 import com.kientran.cinehub.repository.RefreshTokenRepository;
 import com.kientran.cinehub.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ public class RefreshTokenService {
 
     final RefreshTokenRepository refreshTokenRepository;
     final UserRepository userRepository;
+    final EntityManager entityManager;
 
     @Transactional
     public RefreshToken createRefreshToken(String username) {
@@ -30,6 +32,9 @@ public class RefreshTokenService {
 
         // Xóa token cũ của user nếu có (để mỗi user chỉ có 1 session refresh)
         refreshTokenRepository.deleteByUser(user);
+        // Buộc Hibernate flush DELETE xuống DB ngay trước khi INSERT mới
+        // để tránh lỗi duplicate key constraint (unique trên user_id)
+        entityManager.flush();
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
