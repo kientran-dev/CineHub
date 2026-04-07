@@ -25,6 +25,9 @@ public class PremiumPackage extends BaseEntity{
     @Column(name = "duration_days")
     Integer durationDays;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    String description;
+
     @OneToMany(mappedBy = "premiumPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Payment> payments;
 }

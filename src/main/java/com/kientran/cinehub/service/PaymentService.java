@@ -46,6 +46,24 @@ public class PaymentService {
     @Value("${vnpay.return-url}")
     String vnp_ReturnUrl;
 
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getAllPayments() {
+        return paymentRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private PaymentResponse mapToResponse(Payment payment) {
+        return PaymentResponse.builder()
+                .paymentId(payment.getId())
+                .amount(payment.getAmount())
+                .status(payment.getStatus())
+                .paymentDate(payment.getPaymentDate())
+                .username(payment.getUser() != null ? payment.getUser().getUsername() : null)
+                .packageName(payment.getPremiumPackage() != null ? payment.getPremiumPackage().getPackageName() : null)
+                .build();
+    }
+
     @Transactional
     public PaymentResponse createPayment(PaymentRequest request, String username, HttpServletRequest servletRequest) {
         User user = userRepository.findByUsername(username)

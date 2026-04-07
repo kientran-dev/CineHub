@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.List;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -18,15 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    Long id;
-    String username;
-    String email;
-    String fullName;
-    String avatar;
-    LocalDate dateOfBirth;
-    Integer rewardPoints;
-    List<String> roles;
-    Boolean isPremium;
-    OffsetDateTime registeredDate;
+public class DashboardResponse {
+    long totalUsers;
+    long totalMovies;
+    long premiumUsers;
+    BigDecimal totalRevenue;
 }

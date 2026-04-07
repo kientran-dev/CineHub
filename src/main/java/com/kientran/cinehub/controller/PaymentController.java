@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -22,6 +23,11 @@ import java.io.IOException;
 public class PaymentController {
 
     PaymentService paymentService;
+
+    @GetMapping
+    public ResponseEntity<List<PaymentResponse>> getAllPayments() {
+        return ResponseEntity.ok(paymentService.getAllPayments());
+    }
 
     @PostMapping("/create-payment")
     public ResponseEntity<PaymentResponse> createPayment(

@@ -46,9 +46,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/payments/create-payment").authenticated()
 
                         // 3. ADMIN: Các thao tác thay đổi dữ liệu hệ thống
-                        .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/premium-packages/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/premium-packages/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/users/**", "/api/v1/premium-packages/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/dashboard/**", "/api/v1/payments").hasRole("ADMIN")
+                        // GET /api/v1/users is for admin only, but /api/v1/users/me is for all authenticated
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/premium-packages/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

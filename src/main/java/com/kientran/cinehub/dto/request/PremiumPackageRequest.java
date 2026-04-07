@@ -1,4 +1,4 @@
-package com.kientran.cinehub.dto.response;
+package com.kientran.cinehub.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,12 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PaymentResponse {
-    String paymentUrl;
-    Long paymentId;
-    BigDecimal amount;
-    String status;
-    LocalDateTime paymentDate;
-    String username;
+public class PremiumPackageRequest {
     String packageName;
+    BigDecimal price;
+    Integer durationDays;
+    String description;
 }
