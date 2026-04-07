@@ -7,8 +7,12 @@ import com.kientran.cinehub.dto.response.EpisodeVersionResponse;
 import com.kientran.cinehub.dto.response.GenreResponse;
 import com.kientran.cinehub.dto.response.MovieResponse;
 import com.kientran.cinehub.entity.Movie;
+import com.kientran.cinehub.entity.Genre;
 import com.kientran.cinehub.repository.MovieRepository;
+import com.kientran.cinehub.repository.GenreRepository;
 import lombok.AccessLevel;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class MovieService {
 
     MovieRepository movieRepository;
+    GenreRepository genreRepository;
 
     @Transactional
     public MovieResponse createMovie(MovieRequest request) {
@@ -39,6 +44,11 @@ public class MovieService {
                 .type(request.getType())
                 .imdb(request.getImdbScore())
                 .build();
+
+        if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
+            Set<Genre> genres = new HashSet<>(genreRepository.findAllById(request.getGenreIds()));
+            movie.setGenres(genres);
+        }
 
         movie = movieRepository.save(movie);
         return mapToResponse(movie);
@@ -71,6 +81,13 @@ public class MovieService {
         movie.setStatus(request.getStatus());
         movie.setType(request.getType());
         movie.setImdb(request.getImdbScore());
+
+        if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
+            Set<Genre> genres = new HashSet<>(genreRepository.findAllById(request.getGenreIds()));
+            movie.setGenres(genres);
+        } else {
+            movie.setGenres(new HashSet<>());
+        }
 
         movie = movieRepository.save(movie);
         return mapToResponse(movie);

@@ -2,6 +2,7 @@ package com.kientran.cinehub.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,4 +21,5 @@ public class MovieRequest {
     String status;
     String type;
     Double imdbScore;
+    List<Long> genreIds;
 }
