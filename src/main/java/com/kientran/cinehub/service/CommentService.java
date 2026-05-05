@@ -3,8 +3,10 @@ package com.kientran.cinehub.service;
 import com.kientran.cinehub.dto.request.CommentRequest;
 import com.kientran.cinehub.dto.response.CommentResponse;
 import com.kientran.cinehub.entity.Comment;
+import com.kientran.cinehub.entity.CommentReaction;
 import com.kientran.cinehub.entity.Movie;
 import com.kientran.cinehub.entity.User;
+import com.kientran.cinehub.repository.CommentReactionRepository;
 import com.kientran.cinehub.repository.CommentRepository;
 import com.kientran.cinehub.repository.MovieRepository;
 import com.kientran.cinehub.repository.UserRepository;
@@ -12,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +28,7 @@ public class CommentService {
     CommentRepository commentRepository;
     MovieRepository movieRepository;
     UserRepository userRepository;
+    CommentReactionRepository commentReactionRepository;
 
     public CommentResponse addComment(CommentRequest request, String username) {
         User user = userRepository.findByUsername(username)
@@ -81,13 +85,49 @@ public class CommentService {
                     .collect(Collectors.toList());
         }
 
+        long likes = commentReactionRepository.countByCommentIdAndReactionType(comment.getId(), "LIKE");
+        long dislikes = commentReactionRepository.countByCommentIdAndReactionType(comment.getId(), "DISLIKE");
+
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .createdDate(comment.getCreatedDate())
                 .username(comment.getUser().getUsername())
                 .userAvatar(comment.getUser().getAvatar())
+                .likes(likes)
+                .dislikes(dislikes)
                 .replies(repliesDTO)
                 .build();
+    }
+
+    @Transactional
+    public String toggleReaction(Long commentId, String reactionType, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        var existing = commentReactionRepository.findByUserIdAndCommentId(user.getId(), commentId);
+
+        if (existing.isPresent()) {
+            CommentReaction reaction = existing.get();
+            if (reaction.getReactionType().equals(reactionType)) {
+                commentReactionRepository.delete(reaction);
+                return "REMOVED";
+            } else {
+                reaction.setReactionType(reactionType);
+                commentReactionRepository.save(reaction);
+                return reactionType;
+            }
+        } else {
+            CommentReaction reaction = CommentReaction.builder()
+                    .user(user)
+                    .comment(comment)
+                    .reactionType(reactionType)
+                    .build();
+            commentReactionRepository.save(reaction);
+            return reactionType;
+        }
     }
 }

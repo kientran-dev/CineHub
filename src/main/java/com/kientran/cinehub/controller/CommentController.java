@@ -40,4 +40,14 @@ public class CommentController {
         commentService.deleteComment(id, username);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{commentId}/reaction")
+    public ResponseEntity<String> toggleReaction(
+            @PathVariable Long commentId,
+            @RequestParam String type,
+            Authentication authentication) {
+        String username = authentication.getName();
+        String result = commentService.toggleReaction(commentId, type.toUpperCase(), username);
+        return ResponseEntity.ok(result);
+    }
 }

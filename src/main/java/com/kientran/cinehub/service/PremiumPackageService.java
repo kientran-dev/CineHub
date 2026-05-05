@@ -44,6 +44,7 @@ public class PremiumPackageService {
                 .price(request.getPrice())
                 .durationDays(request.getDurationDays())
                 .description(request.getDescription())
+                .rewardPoints(request.getRewardPoints() != null ? request.getRewardPoints() : 0)
                 .build();
         return mapToResponse(premiumPackageRepository.save(pkg));
     }
@@ -56,6 +57,7 @@ public class PremiumPackageService {
         pkg.setPrice(request.getPrice());
         pkg.setDurationDays(request.getDurationDays());
         pkg.setDescription(request.getDescription());
+        if (request.getRewardPoints() != null) pkg.setRewardPoints(request.getRewardPoints());
         return mapToResponse(premiumPackageRepository.save(pkg));
     }
 
@@ -93,6 +95,7 @@ public class PremiumPackageService {
                 .price(pkg.getPrice())
                 .durationDays(pkg.getDurationDays())
                 .description(pkg.getDescription())
+                .rewardPoints(pkg.getRewardPoints())
                 .activeUsers(activeUsers)
                 .totalRevenue(totalRevenue)
                 .build();

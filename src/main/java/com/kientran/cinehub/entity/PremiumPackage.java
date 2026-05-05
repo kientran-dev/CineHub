@@ -28,6 +28,9 @@ public class PremiumPackage extends BaseEntity{
     @Column(name = "description", columnDefinition = "TEXT")
     String description;
 
+    @Column(name = "reward_points")
+    Integer rewardPoints; // Điểm tích lũy tặng khi đăng ký gói này
+
     @OneToMany(mappedBy = "premiumPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Payment> payments;
 }

@@ -43,6 +43,7 @@ public class MovieService {
                 .status(request.getStatus())
                 .type(request.getType())
                 .imdb(request.getImdbScore())
+                .trailerUrl(request.getTrailerUrl())
                 .build();
 
         if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
@@ -81,6 +82,7 @@ public class MovieService {
         movie.setStatus(request.getStatus());
         movie.setType(request.getType());
         movie.setImdb(request.getImdbScore());
+        movie.setTrailerUrl(request.getTrailerUrl());
 
         if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
             Set<Genre> genres = new HashSet<>(genreRepository.findAllById(request.getGenreIds()));
@@ -101,7 +103,7 @@ public class MovieService {
         movieRepository.deleteById(id);
     }
 
-    private MovieResponse mapToResponse(Movie movie) {
+    public MovieResponse mapToResponse(Movie movie) {
         // Tính average rating
         double avgRating = 0;
         int totalRatings = 0;
@@ -176,6 +178,7 @@ public class MovieService {
                 .status(movie.getStatus())
                 .type(movie.getType())
                 .imdbScore(movie.getImdb())
+                .trailerUrl(movie.getTrailerUrl())
                 .averageRating(avgRating)
                 .totalRatings(totalRatings)
                 .genres(genres)

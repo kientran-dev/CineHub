@@ -35,10 +35,30 @@ public class PremiumSubscriptionService {
         User user = payment.getUser();
         PremiumPackage premiumPackage = payment.getPremiumPackage();
 
+        // 1. Chống lỗi duplicate key nếu thao tác DB thủ công:
+        // Một Payment chỉ được tạo duy nhất 1 Subscription (OneToOne).
+        if (subscriptionRepository.existsByPaymentId(payment.getId())) {
+            return; // Đã từng tạo subscription cho payment này rồi, bỏ qua
+        }
+
+        // 2. Kiểm tra xem user có gói nào đang active không
+        PremiumSubscription activeSub = subscriptionRepository.findByUserId(user.getId()).stream()
+                .filter(sub -> "ACTIVE".equals(sub.getStatus()) && sub.getEndDate() != null && sub.getEndDate().isAfter(LocalDateTime.now()))
+                .findFirst()
+                .orElse(null);
+
         LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate;
+
         // Nếu user đang có gói active, cộng dồn ngày vào endDate của gói cũ
-        // Ở đây làm đơn giản là tạo mới từ thời điểm hiện tại
-        LocalDateTime endDate = startDate.plusDays(premiumPackage.getDurationDays());
+        if (activeSub != null) {
+            endDate = activeSub.getEndDate().plusDays(premiumPackage.getDurationDays());
+            // Cập nhật luôn gói cũ thành INACTIVE để tạo gói mới với lịch sử đầy đủ
+            activeSub.setStatus("INACTIVE");
+            subscriptionRepository.save(activeSub);
+        } else {
+            endDate = startDate.plusDays(premiumPackage.getDurationDays());
+        }
 
         PremiumSubscription subscription = PremiumSubscription.builder()
                 .user(user)
@@ -52,6 +72,14 @@ public class PremiumSubscriptionService {
 
         // Cập nhật ngược lại ID subscription cho payment để đối soát
         payment.setPremiumSubscription(subscription);
+
+        // Tặng điểm tích lũy cho user dựa trên gói đã mua
+        int pointsToAward = (premiumPackage.getRewardPoints() != null) ? premiumPackage.getRewardPoints() : 0;
+        if (pointsToAward > 0) {
+            int currentPoints = user.getRewardPoints() != null ? user.getRewardPoints() : 0;
+            user.setRewardPoints(currentPoints + pointsToAward);
+            userRepository.save(user);
+        }
     }
 
     public List<PremiumSubscriptionResponse> getMySubscriptions(String username) {
@@ -61,6 +89,17 @@ public class PremiumSubscriptionService {
         return subscriptionRepository.findByUserId(user.getId()).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public PremiumSubscriptionResponse getActiveSubscription(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return subscriptionRepository.findByUserId(user.getId()).stream()
+                .filter(sub -> "ACTIVE".equals(sub.getStatus()) && sub.getEndDate() != null && sub.getEndDate().isAfter(LocalDateTime.now()))
+                .findFirst()
+                .map(this::mapToResponse)
+                .orElse(null);
     }
 
     private PremiumSubscriptionResponse mapToResponse(PremiumSubscription subscription) {

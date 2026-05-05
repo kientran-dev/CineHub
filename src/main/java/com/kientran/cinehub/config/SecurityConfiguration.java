@@ -35,6 +35,7 @@ public class SecurityConfiguration {
                         // 1. PUBLIC: Ai cũng có quyền truy cập
                         .requestMatchers("/api/v1/auth/**", "/api/v1/payments/vnpay-return").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/comments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/recommendations/similar/**").permitAll()
 
                         // 2. USER: Phải đăng nhập (Authenticated)
                         .requestMatchers("/api/v1/users/me").authenticated()
@@ -44,10 +45,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/comments/**").authenticated()
                         .requestMatchers("/api/v1/subscriptions/**").authenticated()
                         .requestMatchers("/api/v1/payments/create-payment").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/recommendations").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/me/claim-birthday-reward").authenticated()
 
                         // 3. ADMIN: Các thao tác thay đổi dữ liệu hệ thống
-                        .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/premium-packages/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/premium-packages/**", "/api/v1/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/premium-packages/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/payments/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/users/**", "/api/v1/premium-packages/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/dashboard/**", "/api/v1/payments").hasRole("ADMIN")
                         // GET /api/v1/users is for admin only, but /api/v1/users/me is for all authenticated
@@ -71,7 +75,7 @@ public class SecurityConfiguration {
                 "http://localhost:5173", // User frontend
                 "http://localhost:5174"  // Admin frontend
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

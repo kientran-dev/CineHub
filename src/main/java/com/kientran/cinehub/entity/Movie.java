@@ -52,6 +52,9 @@ public class Movie extends BaseEntity{
     @Column(name = "imdb")
     Double imdb;
 
+    @Column(name = "trailer_url")
+    String trailerUrl;
+
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Episode> episodes;
 

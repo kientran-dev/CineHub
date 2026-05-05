@@ -21,4 +21,5 @@ public class PremiumPackageRequest {
     BigDecimal price;
     Integer durationDays;
     String description;
+    Integer rewardPoints; // Điểm tích lũy tặng khi mua gói này
 }

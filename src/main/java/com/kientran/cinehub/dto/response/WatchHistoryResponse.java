@@ -20,6 +20,7 @@ public class WatchHistoryResponse {
     Long id;
     Long episodeVersionId;
     Long episodeId;
+    Long movieId;
     String movieTitle;
     String episodeName;
     String versionType;

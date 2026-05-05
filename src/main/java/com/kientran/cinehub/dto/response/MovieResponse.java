@@ -26,6 +26,7 @@ public class MovieResponse {
     String status;
     String type;
     Double imdbScore;
+    String trailerUrl;
     Double averageRating;
     Integer totalRatings;
     Set<GenreResponse> genres;

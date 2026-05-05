@@ -33,4 +33,13 @@ public class RatingController {
         String username = authentication.getName();
         return ResponseEntity.ok(ratingService.getMyRating(movieId, username));
     }
+
+    @DeleteMapping("/movie/{movieId}")
+    public ResponseEntity<Void> deleteRating(
+            @PathVariable Long movieId,
+            Authentication authentication) {
+        String username = authentication.getName();
+        ratingService.deleteRating(movieId, username);
+        return ResponseEntity.noContent().build();
+    }
 }

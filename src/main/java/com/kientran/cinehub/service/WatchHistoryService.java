@@ -35,13 +35,27 @@ public class WatchHistoryService {
         EpisodeVersion episodeVersion = episodeVersionRepository.findById(request.getEpisodeVersionId())
                 .orElseThrow(() -> new RuntimeException("EpisodeVersion not found"));
 
-        WatchHistory watchHistory = WatchHistory.builder()
-                .user(user)
-                .episodeVersion(episodeVersion)
-                .watchTime(request.getWatchTime())
-                .currentEpisode(request.getCurrentEpisode())
-                .watchDate(LocalDateTime.now())
-                .build();
+        // Kiểm tra xem đã có lịch sử cho phim này chưa
+        Long movieId = episodeVersion.getEpisode().getMovie().getId();
+        WatchHistory watchHistory = watchHistoryRepository.findByUserIdAndMovieId(user.getId(), movieId)
+                .orElse(null);
+
+        if (watchHistory != null) {
+            // Cập nhật bản ghi cũ
+            watchHistory.setEpisodeVersion(episodeVersion);
+            watchHistory.setWatchTime(request.getWatchTime());
+            watchHistory.setCurrentEpisode(request.getCurrentEpisode());
+            watchHistory.setWatchDate(LocalDateTime.now());
+        } else {
+            // Tạo bản ghi mới
+            watchHistory = WatchHistory.builder()
+                    .user(user)
+                    .episodeVersion(episodeVersion)
+                    .watchTime(request.getWatchTime())
+                    .currentEpisode(request.getCurrentEpisode())
+                    .watchDate(LocalDateTime.now())
+                    .build();
+        }
 
         watchHistory = watchHistoryRepository.save(watchHistory);
         return mapToResponse(watchHistory);
@@ -74,6 +88,7 @@ public class WatchHistoryService {
                 .id(history.getId())
                 .episodeVersionId(version.getId())
                 .episodeId(version.getEpisode().getId())
+                .movieId(version.getEpisode().getMovie().getId())
                 .movieTitle(version.getEpisode().getMovie().getTitle())
                 .episodeName(version.getEpisode().getEpisodeName())
                 .versionType(version.getType())

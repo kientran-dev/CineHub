@@ -48,4 +48,11 @@ public class PaymentController {
             response.sendRedirect("http://localhost:5173/profile?payment=failed");
         }
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<PaymentResponse> updatePaymentStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return ResponseEntity.ok(paymentService.updatePaymentStatus(id, status));
+    }
 }

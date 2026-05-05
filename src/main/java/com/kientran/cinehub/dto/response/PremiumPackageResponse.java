@@ -22,6 +22,7 @@ public class PremiumPackageResponse {
     BigDecimal price;
     Integer durationDays;
     String description;
+    Integer rewardPoints;
     Long activeUsers;
     BigDecimal totalRevenue;
 }

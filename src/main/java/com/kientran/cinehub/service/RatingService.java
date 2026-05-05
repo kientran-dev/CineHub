@@ -56,6 +56,17 @@ public class RatingService {
         return mapToResponse(rating);
     }
 
+    @Transactional
+    public void deleteRating(Long movieId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Rating rating = ratingRepository.findByUserIdAndMovieId(user.getId(), movieId)
+                .orElseThrow(() -> new RuntimeException("Rating not found"));
+
+        ratingRepository.delete(rating);
+    }
+
     private RatingResponse mapToResponse(Rating rating) {
         return RatingResponse.builder()
                 .id(rating.getId())

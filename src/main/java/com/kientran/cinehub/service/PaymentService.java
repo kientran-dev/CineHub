@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -72,11 +73,33 @@ public class PaymentService {
         PremiumPackage premiumPackage = packageRepository.findById(request.getPremiumPackageId())
                 .orElseThrow(() -> new RuntimeException("Premium package not found"));
 
+        // Xử lý điểm tích lũy (nếu user muốn dùng)
+        int pointsToUse = request.getPointsToUse() != null ? request.getPointsToUse() : 0;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (pointsToUse > 0) {
+            int currentPoints = user.getRewardPoints() != null ? user.getRewardPoints() : 0;
+            if (pointsToUse > currentPoints) {
+                throw new RuntimeException("Không đủ điểm tích lũy");
+            }
+            // 1 điểm = 1,000 VND giảm giá
+            discountAmount = new BigDecimal(pointsToUse).multiply(new BigDecimal("1000"));
+            // Tối đa giảm không quá số tiền hiện tại, tối thiểu 1,000 VND
+            BigDecimal minAmount = new BigDecimal("1000");
+            if (discountAmount.compareTo(request.getAmount()) >= 0) {
+                discountAmount = request.getAmount().subtract(minAmount);
+            }
+            // Trừ điểm kiếm ngay khi tạo payment (sẽ hoàn lại nếu payment fail - bạn có thể xử lý rollback sau)
+            user.setRewardPoints(currentPoints - pointsToUse);
+            userRepository.save(user);
+        }
+
+        BigDecimal finalAmount = request.getAmount().subtract(discountAmount);
+
         // 1. Lưu thông tin thanh toán tạm thời vào DB
         Payment payment = Payment.builder()
                 .user(user)
                 .premiumPackage(premiumPackage)
-                .amount(request.getAmount())
+                .amount(finalAmount)
                 .paymentMethod("VNPAY")
                 .status("PENDING")
                 .paymentDate(LocalDateTime.now())
@@ -92,7 +115,7 @@ public class PaymentService {
         String vnp_OrderType = "other";
 
         // VNPay yêu cầu số tiền nhân 100
-        long amount = request.getAmount().longValue() * 100;
+        long amount = finalAmount.longValue() * 100;
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -215,5 +238,34 @@ public class PaymentService {
                 .status(payment.getStatus())
                 .amount(payment.getAmount())
                 .build();
+    }
+
+    @Transactional
+    public PaymentResponse updatePaymentStatus(Long id, String newStatus) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch với id: " + id));
+
+        String currentStatus = payment.getStatus();
+
+        // Kiểm tra logic chuyển trạng thái hợp lý
+        if ("SUCCESS".equals(currentStatus)) {
+            throw new RuntimeException("Không thể thay đổi trạng thái của giao dịch đã thành công.");
+        }
+        if ("FAILED".equals(currentStatus)) {
+            throw new RuntimeException("Không thể thay đổi trạng thái của giao dịch đã thất bại.");
+        }
+        if (!"SUCCESS".equals(newStatus) && !"FAILED".equals(newStatus)) {
+            throw new RuntimeException("Trạng thái mới không hợp lệ. Chỉ cho phép: SUCCESS hoặc FAILED.");
+        }
+
+        payment.setStatus(newStatus);
+        paymentRepository.save(payment);
+
+        // Nếu admin xác nhận thành công thủ công → kích hoạt Premium
+        if ("SUCCESS".equals(newStatus)) {
+            subscriptionService.activatePremium(payment);
+        }
+
+        return mapToResponse(payment);
     }
 }

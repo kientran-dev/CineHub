@@ -23,5 +23,7 @@ public class CommentResponse {
     LocalDateTime createdDate;
     String username;
     String userAvatar;
+    Long likes;
+    Long dislikes;
     List<CommentResponse> replies;
 }

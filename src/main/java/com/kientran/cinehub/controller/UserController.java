@@ -44,4 +44,22 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/grant-admin")
+    public ResponseEntity<Void> grantAdminRole(@PathVariable Long id) {
+        userService.grantAdminRole(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/revoke-admin")
+    public ResponseEntity<Void> revokeAdminRole(@PathVariable Long id) {
+        userService.revokeAdminRole(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/me/claim-birthday-reward")
+    public ResponseEntity<UserResponse> claimBirthdayReward(Authentication authentication) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(userService.claimBirthdayReward(username));
+    }
 }

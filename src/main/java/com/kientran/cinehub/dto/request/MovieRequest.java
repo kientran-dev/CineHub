@@ -21,5 +21,6 @@ public class MovieRequest {
     String status;
     String type;
     Double imdbScore;
+    String trailerUrl;
     List<Long> genreIds;
 }

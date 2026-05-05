@@ -19,4 +19,5 @@ import java.math.BigDecimal;
 public class PaymentRequest {
     Long premiumPackageId;
     BigDecimal amount;
+    Integer pointsToUse; // Số điểm tích lũy muốn dùng (1 điểm = 1000 VND)
 }

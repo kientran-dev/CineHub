@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -28,5 +29,7 @@ public class UserResponse {
     Integer rewardPoints;
     List<String> roles;
     Boolean isPremium;
+    String premiumPackageName;
+    LocalDateTime premiumEndDate;
     OffsetDateTime registeredDate;
 }

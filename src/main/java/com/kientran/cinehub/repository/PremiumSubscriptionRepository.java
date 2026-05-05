@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface PremiumSubscriptionRepository extends JpaRepository<PremiumSubscription, Long> {
     List<PremiumSubscription> findByUserId(Long userId);
+    boolean existsByPaymentId(Long paymentId);
 }

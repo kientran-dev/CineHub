@@ -32,7 +32,7 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "full_name")
     String fullName;
 
-    @Column(name = "avatar_url")
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
     String avatar;
 
     @Column(name = "email", unique = true, nullable = false)
@@ -43,6 +43,9 @@ public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "reward_points")
     Integer rewardPoints;
+
+    @Column(name = "last_birthday_reward_year")
+    Integer lastBirthdayRewardYear;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> comments;
