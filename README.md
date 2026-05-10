@@ -1,6 +1,8 @@
 # CineHub
 
-CineHub is a modern cinema management REST API built with **Spring Boot**, **Spring Security**, **JWT authentication**, and **PostgreSQL** (Spring Data JPA).
+CineHub is a modern cinema management REST API built with **Spring Boot**, **Spring Security**, **JWT authentication**, and **PostgreSQL** (Backend).
+
+Frontend: https://github.com/kientran-dev/CineHub_FE
 
 ## Tech Stack
 - **Java**: 17 (configured in `pom.xml`)
