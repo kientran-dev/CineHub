@@ -17,6 +17,7 @@ public class MovieRequest {
     String poster;
     String director;
     Integer releaseYear;
+    Integer duration;
     String country;
     String status;
     String type;

@@ -33,6 +33,7 @@ public class PaymentService {
     final PremiumPackageRepository packageRepository;
     final UserRepository userRepository;
     final PremiumSubscriptionService subscriptionService;
+    final EmailService emailService;
 
 
     @Value("${vnpay.tmn-code}")
@@ -226,8 +227,19 @@ public class PaymentService {
             if (!"SUCCESS".equals(payment.getStatus())) {
                 payment.setStatus("SUCCESS");
                 paymentRepository.save(payment);
-                // Kích hoạt gói Premium để đánh dấu User này không phải xem quảng cáo
                 subscriptionService.activatePremium(payment);
+                // Gửi email xác nhận thanh toán
+                User paidUser = payment.getUser();
+                if (paidUser != null && paidUser.getEmail() != null) {
+                    emailService.sendPaymentConfirmation(
+                        paidUser.getEmail(),
+                        paidUser.getFullName() != null ? paidUser.getFullName() : paidUser.getUsername(),
+                        payment.getPremiumPackage() != null ? payment.getPremiumPackage().getPackageName() : "Premium",
+                        payment.getAmount(),
+                        payment.getPaymentDate(),
+                        payment.getId()
+                    );
+                }
             }
         } else {
             payment.setStatus("FAILED");

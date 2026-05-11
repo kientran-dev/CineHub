@@ -93,6 +93,7 @@ public class CommentService {
                 .content(comment.getContent())
                 .createdDate(comment.getCreatedDate())
                 .username(comment.getUser().getUsername())
+                .fullName(comment.getUser().getFullName())
                 .userAvatar(comment.getUser().getAvatar())
                 .likes(likes)
                 .dislikes(dislikes)

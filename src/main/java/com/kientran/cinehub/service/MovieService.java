@@ -44,6 +44,7 @@ public class MovieService {
                 .type(request.getType())
                 .imdb(request.getImdbScore())
                 .trailerUrl(request.getTrailerUrl())
+                .duration(request.getDuration())
                 .build();
 
         if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
@@ -83,6 +84,7 @@ public class MovieService {
         movie.setType(request.getType());
         movie.setImdb(request.getImdbScore());
         movie.setTrailerUrl(request.getTrailerUrl());
+        movie.setDuration(request.getDuration());
 
         if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
             Set<Genre> genres = new HashSet<>(genreRepository.findAllById(request.getGenreIds()));

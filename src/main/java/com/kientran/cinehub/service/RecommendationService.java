@@ -6,6 +6,7 @@ import com.kientran.cinehub.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * - User mới (chưa có tương tác) → fallback sang phim phổ biến
  * - Phim mới (chưa ai tương tác) → không được gợi ý cho đến khi có dữ liệu
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -58,10 +60,12 @@ public class RecommendationService {
         // Bước 2: Lấy vector rating của user hiện tại
         Map<Long, Double> currentUserRatings = userMovieMatrix.get(userId);
 
-        // Cold Start: user chưa có tương tác nào → trả phim phổ biến
         if (currentUserRatings == null || currentUserRatings.isEmpty()) {
+            log.info("\u001B[32m[Recommend] User '{}' (ID: {}) chưa có lịch sử tương tác → Trả về phim phổ biến.\u001B[0m", username, userId);
             return getPopularMovies(MAX_RECOMMENDATIONS);
         }
+
+        log.info("\u001B[32m[Recommend] Bắt đầu tính toán cho User '{}'. Đã tương tác với {} phim.\u001B[0m", username, currentUserRatings.size());
 
         // Bước 3: Lấy tất cả movieId mà user đã tương tác
         Set<Long> interactedMovieIds = currentUserRatings.keySet();
@@ -105,8 +109,11 @@ public class RecommendationService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
+        log.info("\u001B[32m[Recommend] User '{}' → Top {} phim dự đoán điểm cao nhất: {}\u001B[0m", username, recommendedIds.size(), recommendedIds);
+
         // Cold Start partial: nếu gợi ý quá ít → bổ sung phim phổ biến
         if (recommendedIds.size() < MAX_RECOMMENDATIONS) {
+            log.info("\u001B[32m[Recommend] User '{}' không đủ phim gợi ý ({}/{}). Đang bổ sung thêm phim phổ biến...\u001B[0m", username, recommendedIds.size(), MAX_RECOMMENDATIONS);
             List<MovieResponse> popular = getPopularMovies(MAX_RECOMMENDATIONS);
             Set<Long> existingIds = new HashSet<>(recommendedIds);
             existingIds.addAll(interactedMovieIds);
@@ -141,6 +148,8 @@ public class RecommendationService {
      */
     @Transactional(readOnly = true)
     public List<MovieResponse> getSimilarMovies(Long movieId) {
+        log.info("\u001B[33m[Similar] Bắt đầu tìm phim tương tự cho Movie ID: {}\u001B[0m", movieId);
+
         // Xây ma trận User-Movie
         Map<Long, Map<Long, Double>> userMovieMatrix = buildUserMovieMatrix();
 
@@ -166,8 +175,11 @@ public class RecommendationService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
+        log.info("\u001B[33m[Similar] Tìm thấy {} phim có Cosine Similarity cao với Movie ID {}: {}\u001B[0m", similarIds.size(), movieId, similarIds);
+
         // Nếu chưa đủ dữ liệu CF → fallback: lấy phim phổ biến (trừ phim hiện tại)
         if (similarIds.size() < 6) {
+            log.info("\u001B[33m[Similar] Số lượng phim tương tự quá ít ({}). Bổ sung phim phổ biến...\u001B[0m", similarIds.size());
             List<MovieResponse> popular = getPopularMovies(MAX_RECOMMENDATIONS + 1);
             Set<Long> existingIds = new HashSet<>(similarIds);
             existingIds.add(movieId);
@@ -208,6 +220,7 @@ public class RecommendationService {
      * Nếu user vừa rating vừa favorite → ưu tiên rating (explicit)
      */
     private Map<Long, Map<Long, Double>> buildUserMovieMatrix() {
+        log.info("\u001B[36m[Matrix] Đang xây dựng ma trận User-Movie từ DB...\u001B[0m");
         Map<Long, Map<Long, Double>> matrix = new HashMap<>();
 
         // 1. Từ bảng Rating (explicit feedback — ưu tiên cao nhất)
@@ -233,6 +246,7 @@ public class RecommendationService {
                     .putIfAbsent(mId, WATCHED_SCORE); // Không ghi đè rating hoặc favorite
         }
 
+        log.info("\u001B[36m[Matrix] Xây dựng xong. Có {} users tham gia vào ma trận.\u001B[0m", matrix.size());
         return matrix;
     }
 
