@@ -20,4 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "GROUP BY EXTRACT(YEAR FROM u.created_at), EXTRACT(MONTH FROM u.created_at) " +
             "ORDER BY EXTRACT(YEAR FROM u.created_at), EXTRACT(MONTH FROM u.created_at)", nativeQuery = true)
     List<Object[]> countUsersByMonth();
+
+    @Query(value = "SELECT CAST(u.created_at AS DATE) as createdDay, COUNT(u.id) as total " +
+            "FROM users u WHERE u.created_at >= CURRENT_DATE - INTERVAL '7 days' " +
+            "GROUP BY CAST(u.created_at AS DATE) ORDER BY CAST(u.created_at AS DATE)", nativeQuery = true)
+    List<Object[]> countUsersLast7Days();
 }

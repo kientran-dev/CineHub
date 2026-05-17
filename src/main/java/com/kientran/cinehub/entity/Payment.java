@@ -36,7 +36,7 @@ public class Payment extends BaseEntity{
     @JoinColumn(name = "premium_package_id")
     PremiumPackage premiumPackage;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "premium_subscription_id")
     PremiumSubscription premiumSubscription;
 }

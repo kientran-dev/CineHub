@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "premium_subscriptions")
@@ -24,11 +25,10 @@ public class PremiumSubscription extends BaseEntity{
     @Column(name = "status")
     String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
-    Payment payment;
+    @OneToMany(mappedBy = "premiumSubscription", fetch = FetchType.LAZY)
+    List<Payment> payments;
 }

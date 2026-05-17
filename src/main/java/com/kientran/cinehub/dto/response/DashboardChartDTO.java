@@ -17,6 +17,19 @@ public class DashboardChartDTO {
     List<GenreCount> genreDistribution;
     List<DailyViews> viewsByDay;
     List<MonthlyRevenue> userGrowthByMonth;
+    List<DailyStat> statsByDay;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class DailyStat {
+        String day;
+        BigDecimal revenue;
+        long users;
+    }
 
     @Getter
     @Setter

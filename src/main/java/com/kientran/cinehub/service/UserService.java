@@ -123,15 +123,11 @@ public class UserService {
 
     private UserResponse mapToResponse(User user) {
         // Tìm subscription ACTIVE còn hạn
-        PremiumSubscription activeSub = null;
-        if (user.getSubscriptions() != null) {
-            activeSub = user.getSubscriptions().stream()
-                    .filter(sub -> "ACTIVE".equals(sub.getStatus()) && sub.getEndDate() != null && sub.getEndDate().isAfter(LocalDateTime.now()))
-                    .findFirst()
-                    .orElse(null);
-        }
-
-        boolean isPremium = activeSub != null;
+        PremiumSubscription activeSub = user.getSubscription();
+        boolean isPremium = activeSub != null
+                && "ACTIVE".equals(activeSub.getStatus())
+                && activeSub.getEndDate() != null
+                && activeSub.getEndDate().isAfter(LocalDateTime.now());
                  
         List<String> roles = user.getRoles().stream()
                  .map(Role::getName)
@@ -145,11 +141,11 @@ public class UserService {
                 .avatar(user.getAvatar())
                 .dateOfBirth(user.getDateOfBirth())
                 .rewardPoints(user.getRewardPoints())
+                .lastBirthdayRewardYear(user.getLastBirthdayRewardYear())
                 .roles(roles)
                 .isPremium(isPremium)
-                .premiumPackageName(activeSub != null && activeSub.getPayment() != null && activeSub.getPayment().getPremiumPackage() != null
-                        ? activeSub.getPayment().getPremiumPackage().getPackageName() : null)
-                .premiumEndDate(activeSub != null ? activeSub.getEndDate() : null)
+                .premiumPackageName(null)
+                .premiumEndDate(isPremium ? activeSub.getEndDate() : null)
                 .registeredDate(user.getCreatedAt())
                 .build();
     }

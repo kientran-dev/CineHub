@@ -55,6 +55,15 @@ public class PaymentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getMyPayments(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return paymentRepository.findByUserIdAndStatusOrderByPaymentDateDesc(user.getId(), "SUCCESS").stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private PaymentResponse mapToResponse(Payment payment) {
         return PaymentResponse.builder()
                 .paymentId(payment.getId())

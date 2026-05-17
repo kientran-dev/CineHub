@@ -29,6 +29,12 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<List<PaymentResponse>> getMyPayments(Authentication authentication) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(paymentService.getMyPayments(username));
+    }
+
     @PostMapping("/create-payment")
     public ResponseEntity<PaymentResponse> createPayment(
             @RequestBody PaymentRequest request,

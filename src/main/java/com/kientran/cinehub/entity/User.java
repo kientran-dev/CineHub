@@ -62,8 +62,8 @@ public class User extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Payment> payments;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<PremiumSubscription> subscriptions;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    PremiumSubscription subscription;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

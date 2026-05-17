@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/subscriptions")
 @RequiredArgsConstructor
@@ -18,12 +16,6 @@ import java.util.List;
 public class PremiumSubscriptionController {
 
     PremiumSubscriptionService subscriptionService;
-
-    @GetMapping("/my")
-    public ResponseEntity<List<PremiumSubscriptionResponse>> getMySubscriptions(Authentication authentication) {
-        String username = authentication.getName();
-        return ResponseEntity.ok(subscriptionService.getMySubscriptions(username));
-    }
 
     @GetMapping("/my/active")
     public ResponseEntity<PremiumSubscriptionResponse> getMyActiveSubscription(Authentication authentication) {

@@ -15,6 +15,7 @@ public class MovieRequest {
     String englishTitle;
     String thumbnail;
     String poster;
+    String description;
     String director;
     Integer releaseYear;
     Integer duration;
@@ -24,4 +25,5 @@ public class MovieRequest {
     Double imdbScore;
     String trailerUrl;
     List<Long> genreIds;
+    List<Long> actorIds;
 }

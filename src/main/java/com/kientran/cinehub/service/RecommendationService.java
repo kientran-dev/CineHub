@@ -14,12 +14,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Hệ thống Khuyến nghị (Recommendation System) sử dụng Item-Based Collaborative Filtering.
+ * Hệ thống Khuyến nghị (Recommendation System) sử dụng Item-Based Collaborative
+ * Filtering.
  *
  * Nguyên lý:
- * - Xây dựng ma trận User-Movie từ dữ liệu: Rating (explicit) + WatchHistory & Favorite (implicit)
+ * - Xây dựng ma trận User-Movie từ dữ liệu: Rating (explicit) + WatchHistory &
+ * Favorite (implicit)
  * - Tính Cosine Similarity giữa các cặp phim dựa trên cách user đánh giá chúng
- * - Với mỗi phim mà user đã tương tác → tìm phim tương tự → dự đoán score → gợi ý
+ * - Với mỗi phim mà user đã tương tác → tìm phim tương tự → dự đoán score → gợi
+ * ý
  *
  * Xử lý Cold Start:
  * - User mới (chưa có tương tác) → fallback sang phim phổ biến
@@ -41,8 +44,8 @@ public class RecommendationService {
     // Điểm ngầm (implicit score) cho các hành vi khác nhau
     private static final double FAVORITE_SCORE = 4.5;
     private static final double WATCHED_SCORE = 3.5;
-    private static final int TOP_K_SIMILAR = 10;     // Số phim tương tự tối đa để tính
-    private static final int MAX_RECOMMENDATIONS = 12; // Số phim gợi ý tối đa
+    private static final int TOP_K_SIMILAR = 10; // Số phim tương tự tối đa để tính
+    private static final int MAX_RECOMMENDATIONS = 6; // Số phim gợi ý tối đa
 
     /**
      * Gợi ý phim cho user dựa trên Collaborative Filtering.
@@ -61,11 +64,14 @@ public class RecommendationService {
         Map<Long, Double> currentUserRatings = userMovieMatrix.get(userId);
 
         if (currentUserRatings == null || currentUserRatings.isEmpty()) {
-            log.info("\u001B[32m[Recommend] User '{}' (ID: {}) chưa có lịch sử tương tác → Trả về phim phổ biến.\u001B[0m", username, userId);
+            log.info(
+                    "\u001B[32m[Recommend] User '{}' (ID: {}) chưa có lịch sử tương tác → Trả về phim phổ biến.\u001B[0m",
+                    username, userId);
             return getPopularMovies(MAX_RECOMMENDATIONS);
         }
 
-        log.info("\u001B[32m[Recommend] Bắt đầu tính toán cho User '{}'. Đã tương tác với {} phim.\u001B[0m", username, currentUserRatings.size());
+        log.info("\u001B[32m[Recommend] Bắt đầu tính toán cho User '{}'. Đã tương tác với {} phim.\u001B[0m", username,
+                currentUserRatings.size());
 
         // Bước 3: Lấy tất cả movieId mà user đã tương tác
         Set<Long> interactedMovieIds = currentUserRatings.keySet();
@@ -81,7 +87,8 @@ public class RecommendationService {
 
         for (Long candidateMovieId : allMovieIds) {
             // Bỏ qua phim user đã tương tác
-            if (interactedMovieIds.contains(candidateMovieId)) continue;
+            if (interactedMovieIds.contains(candidateMovieId))
+                continue;
 
             double weightedSum = 0;
             double similaritySum = 0;
@@ -109,20 +116,32 @@ public class RecommendationService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        log.info("\u001B[32m[Recommend] User '{}' → Top {} phim dự đoán điểm cao nhất: {}\u001B[0m", username, recommendedIds.size(), recommendedIds);
+        log.info("\u001B[32m[Recommend] User '{}' → Top {} phim dự đoán điểm cao nhất: {}\u001B[0m", username,
+                recommendedIds.size(), recommendedIds);
 
         // Cold Start partial: nếu gợi ý quá ít → bổ sung phim phổ biến
         if (recommendedIds.size() < MAX_RECOMMENDATIONS) {
-            log.info("\u001B[32m[Recommend] User '{}' không đủ phim gợi ý ({}/{}). Đang bổ sung thêm phim phổ biến...\u001B[0m", username, recommendedIds.size(), MAX_RECOMMENDATIONS);
+            log.info(
+                    "\u001B[32m[Recommend] User '{}' không đủ phim gợi ý ({}/{}). Đang bổ sung thêm phim phổ biến...\u001B[0m",
+                    username, recommendedIds.size(), MAX_RECOMMENDATIONS);
             List<MovieResponse> popular = getPopularMovies(MAX_RECOMMENDATIONS);
             Set<Long> existingIds = new HashSet<>(recommendedIds);
             existingIds.addAll(interactedMovieIds);
+            int skippedCount = 0;
             for (MovieResponse m : popular) {
                 if (!existingIds.contains(m.getId()) && recommendedIds.size() < MAX_RECOMMENDATIONS) {
                     recommendedIds.add(m.getId());
                     existingIds.add(m.getId());
+                } else if (existingIds.contains(m.getId())) {
+                    skippedCount++;
                 }
             }
+            if (skippedCount > 0) {
+                log.info("\u001B[32m[Recommend] User '{}' → Đã bỏ qua {} phim phổ biến vì đã có trong lịch sử xem.\u001B[0m", 
+                        username, skippedCount);
+            }
+            log.info("\u001B[32m[Recommend] User '{}' → Tổng cộng có {} phim sau khi bổ sung thêm gợi ý.\u001B[0m",
+                    username, recommendedIds.size());
         }
 
         if (recommendedIds.isEmpty()) {
@@ -161,7 +180,8 @@ public class RecommendationService {
         // Tính similarity giữa movieId và tất cả phim khác
         Map<Long, Double> similarities = new HashMap<>();
         for (Long otherId : allMovieIds) {
-            if (otherId.equals(movieId)) continue;
+            if (otherId.equals(movieId))
+                continue;
             double sim = computeItemSimilarity(movieId, otherId, userMovieMatrix);
             if (sim > 0) {
                 similarities.put(otherId, sim);
@@ -175,11 +195,13 @@ public class RecommendationService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        log.info("\u001B[33m[Similar] Tìm thấy {} phim có Cosine Similarity cao với Movie ID {}: {}\u001B[0m", similarIds.size(), movieId, similarIds);
+        log.info("\u001B[33m[Similar] Tìm thấy {} phim có Cosine Similarity cao với Movie ID {}: {}\u001B[0m",
+                similarIds.size(), movieId, similarIds);
 
         // Nếu chưa đủ dữ liệu CF → fallback: lấy phim phổ biến (trừ phim hiện tại)
-        if (similarIds.size() < 6) {
-            log.info("\u001B[33m[Similar] Số lượng phim tương tự quá ít ({}). Bổ sung phim phổ biến...\u001B[0m", similarIds.size());
+        if (similarIds.size() < 3) {
+            log.info("\u001B[33m[Similar] Số lượng phim tương tự quá ít ({}). Bổ sung phim phổ biến...\u001B[0m",
+                    similarIds.size());
             List<MovieResponse> popular = getPopularMovies(MAX_RECOMMENDATIONS + 1);
             Set<Long> existingIds = new HashSet<>(similarIds);
             existingIds.add(movieId);
@@ -189,6 +211,8 @@ public class RecommendationService {
                     existingIds.add(m.getId());
                 }
             }
+            log.info("\u001B[33m[Similar] Movie ID {} → Bổ sung {} phim phổ biến, tổng: {} phim tương tự.\u001B[0m",
+                    movieId, similarIds.size() - similarities.size(), similarIds.size());
         }
 
         if (similarIds.isEmpty()) {
@@ -254,14 +278,14 @@ public class RecommendationService {
      * Tính Cosine Similarity giữa 2 phim dựa trên vector rating từ tất cả user.
      *
      * Công thức:
-     *                    Σ(Rᵤₐ × Rᵤᵦ)
+     * Σ(Rᵤₐ × Rᵤᵦ)
      * sim(A, B) = ─────────────────────────────
-     *              √(Σ Rᵤₐ²) × √(Σ Rᵤᵦ²)
+     * √(Σ Rᵤₐ²) × √(Σ Rᵤᵦ²)
      *
      * Trong đó u là các user đã rating CẢ HAI phim A và B.
      */
     private double computeItemSimilarity(Long movieA, Long movieB,
-                                          Map<Long, Map<Long, Double>> userMovieMatrix) {
+            Map<Long, Map<Long, Double>> userMovieMatrix) {
         double dotProduct = 0;
         double normA = 0;
         double normB = 0;
@@ -282,10 +306,12 @@ public class RecommendationService {
         }
 
         // Cần ít nhất 2 user chung để similarity có ý nghĩa
-        if (commonUsers < 2) return 0;
+        if (commonUsers < 2)
+            return 0;
 
         double denominator = Math.sqrt(normA) * Math.sqrt(normB);
-        if (denominator == 0) return 0;
+        if (denominator == 0)
+            return 0;
 
         return dotProduct / denominator;
     }

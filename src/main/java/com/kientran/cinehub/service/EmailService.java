@@ -81,7 +81,7 @@ public class EmailService {
                           </table>
                           <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; margin:20px 0;">
                             <p style="margin:0; color:#dc2626; font-weight:bold;">🎉 Tài khoản Premium của bạn đã được kích hoạt!</p>
-                            <p style="margin:8px 0 0; color:#444; font-size:14px;">Bạn có thể truy cập ngay vào tất cả nội dung Premium trên CineHub.</p>
+                            <p style="margin:8px 0 0; color:#444; font-size:14px;">Hãy tận hưởng toàn bộ tính năng Premium trên CineHub!</p>
                           </div>
                           <div style="text-align:center; margin-top:24px;">
                             <a href="http://localhost:5173" style="background:#dc2626; color:#fff; padding:12px 32px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;">Xem phim ngay →</a>

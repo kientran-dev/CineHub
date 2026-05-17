@@ -8,8 +8,10 @@ import com.kientran.cinehub.dto.response.GenreResponse;
 import com.kientran.cinehub.dto.response.MovieResponse;
 import com.kientran.cinehub.entity.Movie;
 import com.kientran.cinehub.entity.Genre;
+import com.kientran.cinehub.entity.Actor;
 import com.kientran.cinehub.repository.MovieRepository;
 import com.kientran.cinehub.repository.GenreRepository;
+import com.kientran.cinehub.repository.ActorRepository;
 import lombok.AccessLevel;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +31,7 @@ public class MovieService {
 
     MovieRepository movieRepository;
     GenreRepository genreRepository;
+    ActorRepository actorRepository;
 
     @Transactional
     public MovieResponse createMovie(MovieRequest request) {
@@ -37,6 +40,7 @@ public class MovieService {
                 .englishTitle(request.getEnglishTitle())
                 .thumbnail(request.getThumbnail())
                 .poster(request.getPoster())
+                .description(request.getDescription())
                 .director(request.getDirector())
                 .releaseYear(request.getReleaseYear())
                 .country(request.getCountry())
@@ -50,6 +54,11 @@ public class MovieService {
         if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
             Set<Genre> genres = new HashSet<>(genreRepository.findAllById(request.getGenreIds()));
             movie.setGenres(genres);
+        }
+
+        if (request.getActorIds() != null && !request.getActorIds().isEmpty()) {
+            List<Actor> actors = actorRepository.findAllById(request.getActorIds());
+            movie.setActors(actors);
         }
 
         movie = movieRepository.save(movie);
@@ -77,6 +86,7 @@ public class MovieService {
         movie.setEnglishTitle(request.getEnglishTitle());
         movie.setThumbnail(request.getThumbnail());
         movie.setPoster(request.getPoster());
+        movie.setDescription(request.getDescription());
         movie.setDirector(request.getDirector());
         movie.setReleaseYear(request.getReleaseYear());
         movie.setCountry(request.getCountry());
@@ -91,6 +101,13 @@ public class MovieService {
             movie.setGenres(genres);
         } else {
             movie.setGenres(new HashSet<>());
+        }
+
+        if (request.getActorIds() != null && !request.getActorIds().isEmpty()) {
+            List<Actor> actors = actorRepository.findAllById(request.getActorIds());
+            movie.setActors(actors);
+        } else {
+            movie.setActors(new java.util.ArrayList<>());
         }
 
         movie = movieRepository.save(movie);
@@ -136,13 +153,13 @@ public class MovieService {
                         List<EpisodeVersionResponse> versions = e.getEpisodeVersions() == null
                                 ? Collections.emptyList()
                                 : e.getEpisodeVersions().stream()
-                                    .map(v -> EpisodeVersionResponse.builder()
-                                            .id(v.getId())
-                                            .episodeId(e.getId())
-                                            .videoUrl(v.getVideoUrl())
-                                            .type(v.getType())
-                                            .build())
-                                    .collect(Collectors.toList());
+                                        .map(v -> EpisodeVersionResponse.builder()
+                                                .id(v.getId())
+                                                .episodeId(e.getId())
+                                                .videoUrl(v.getVideoUrl())
+                                                .type(v.getType())
+                                                .build())
+                                        .collect(Collectors.toList());
                         return EpisodeResponse.builder()
                                 .id(e.getId())
                                 .movieId(movie.getId())
@@ -188,4 +205,4 @@ public class MovieService {
                 .actors(actors)
                 .build();
     }
-}
+}

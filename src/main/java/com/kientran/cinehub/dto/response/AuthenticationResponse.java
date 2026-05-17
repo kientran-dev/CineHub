@@ -23,12 +23,13 @@ public class AuthenticationResponse {
 
     @Data
     @Builder
-    @JsonPropertyOrder({"username", "email", "fullName", "roles"})
+    @JsonPropertyOrder({"username", "email", "fullName", "roles", "avatar"})
     @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
     public static class UserData {
         String username;
         String fullName;
         String email;
         Set<String> roles;
+        String avatar;
     }
 }

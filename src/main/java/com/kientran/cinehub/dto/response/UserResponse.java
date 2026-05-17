@@ -27,6 +27,7 @@ public class UserResponse {
     String avatar;
     LocalDate dateOfBirth;
     Integer rewardPoints;
+    Integer lastBirthdayRewardYear;
     List<String> roles;
     Boolean isPremium;
     String premiumPackageName;

@@ -112,6 +112,7 @@ public class AuthenticationService {
                 .username(user.getUsername())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .avatar(user.getAvatar())
                 .roles(user.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet()))

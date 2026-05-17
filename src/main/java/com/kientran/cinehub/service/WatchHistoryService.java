@@ -37,15 +37,24 @@ public class WatchHistoryService {
 
         // Kiểm tra xem đã có lịch sử cho phim này chưa
         Long movieId = episodeVersion.getEpisode().getMovie().getId();
-        WatchHistory watchHistory = watchHistoryRepository.findByUserIdAndMovieId(user.getId(), movieId)
-                .orElse(null);
+        List<WatchHistory> existingList = watchHistoryRepository.findByUserIdAndMovieId(user.getId(), movieId);
 
-        if (watchHistory != null) {
-            // Cập nhật bản ghi cũ
+        WatchHistory watchHistory;
+
+        if (!existingList.isEmpty()) {
+            // Lấy bản ghi mới nhất (đã ORDER BY watchDate DESC)
+            watchHistory = existingList.get(0);
             watchHistory.setEpisodeVersion(episodeVersion);
             watchHistory.setWatchTime(request.getWatchTime());
             watchHistory.setCurrentEpisode(request.getCurrentEpisode());
             watchHistory.setWatchDate(LocalDateTime.now());
+
+            // Xóa bản ghi trùng lặp (giữ lại bản ghi đầu tiên)
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    watchHistoryRepository.delete(existingList.get(i));
+                }
+            }
         } else {
             // Tạo bản ghi mới
             watchHistory = WatchHistory.builder()

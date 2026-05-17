@@ -36,8 +36,6 @@ public class DashboardService {
 
         long premiumUsers = subscriptionRepository.findAll().stream()
                 .filter(sub -> "ACTIVE".equals(sub.getStatus()) && sub.getEndDate() != null && sub.getEndDate().isAfter(LocalDateTime.now()))
-                .map(sub -> sub.getUser().getId())
-                .distinct()
                 .count();
 
         BigDecimal totalRevenue = paymentRepository.findAll().stream()
@@ -65,6 +63,7 @@ public class DashboardService {
                 .genreDistribution(genreDistribution)
                 .viewsByDay(viewsByDay)
                 .userGrowthByMonth(userGrowth)
+                .statsByDay(buildDailyStats())
                 .build();
     }
 
@@ -116,6 +115,50 @@ public class DashboardService {
                     .month(label)
                     .revenue(revenueMap.getOrDefault(key, BigDecimal.ZERO))
                     .users(userMap.getOrDefault(key, 0L))
+                    .build());
+        }
+        return result;
+    }
+
+    private List<DashboardChartDTO.DailyStat> buildDailyStats() {
+        List<Object[]> rawRevenue = paymentRepository.findDailyRevenueLast7Days();
+        List<Object[]> rawUsers = userRepository.countUsersLast7Days();
+
+        Map<LocalDate, BigDecimal> revenueMap = new LinkedHashMap<>();
+        for (Object[] row : rawRevenue) {
+            LocalDate date;
+            if (row[0] instanceof java.sql.Date) {
+                date = ((java.sql.Date) row[0]).toLocalDate();
+            } else if (row[0] instanceof java.util.Date) {
+                date = ((java.sql.Date) row[0]).toLocalDate();
+            } else {
+                date = LocalDate.parse(row[0].toString());
+            }
+            revenueMap.put(date, new BigDecimal(row[1].toString()));
+        }
+
+        Map<LocalDate, Long> userMap = new LinkedHashMap<>();
+        for (Object[] row : rawUsers) {
+            LocalDate date;
+            if (row[0] instanceof java.sql.Date) {
+                date = ((java.sql.Date) row[0]).toLocalDate();
+            } else if (row[0] instanceof java.util.Date) {
+                date = ((java.sql.Date) row[0]).toLocalDate();
+            } else {
+                date = LocalDate.parse(row[0].toString());
+            }
+            userMap.put(date, ((Number) row[1]).longValue());
+        }
+
+        List<DashboardChartDTO.DailyStat> result = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (int i = 6; i >= 0; i--) {
+            LocalDate d = today.minusDays(i);
+            String label = d.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"));
+            result.add(DashboardChartDTO.DailyStat.builder()
+                    .day(label)
+                    .revenue(revenueMap.getOrDefault(d, BigDecimal.ZERO))
+                    .users(userMap.getOrDefault(d, 0L))
                     .build());
         }
         return result;
