@@ -1,43 +1,36 @@
-
-# Backup videos
-user/public/*.mp4
-
-# Node modules
-node_modules/
-**/node_modules/
-
-# Build output
-dist/
-**/dist/
-build/
-**/build/
-
-# Maven build artifacts
+HELP.md
 target/
-**/target/
-*.class
-*.jar
-*.war
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# Environment files
-user/.env
-.env
-.env.local
-.env.*.local
-**/.env
-**/.env.local
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-# IDE
-.idea/
-**/.idea/
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
 .vscode/
 
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Logs
-*.log
-npm-debug.log*
+### Environment Variables ###
+.env

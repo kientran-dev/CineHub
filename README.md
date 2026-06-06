@@ -1,108 +1,52 @@
 # CineHub
 
-A full-stack movie streaming platform — monorepo containing **backend API**, **user-facing app**, and **admin dashboard**.
+CineHub is a modern cinema management REST API built with **Spring Boot**, **Spring Security**, **JWT authentication**, and **PostgreSQL** (BE).
 
----
-
-## Repository Structure
-
-```text
-CineHub/
-├── CineHub/       # Spring Boot backend (REST API)
-├── user/          # User-facing movie streaming app (React + Vite)
-└── admin/         # Admin dashboard (React + Vite)
-```
-
----
+FE: https://github.com/kientran-dev/CineHub_FE
 
 ## Tech Stack
+- **Java**: 17 (configured in `pom.xml`)
+- **Spring Boot**: using `spring-boot-starter-parent` (version defined in `pom.xml`)
+- **Database**: PostgreSQL + Spring Data JPA
+- **Security**: Spring Security + JWT (jjwt)
+- **Build tool**: Maven (`mvnw`, `.mvn/`)
+- **Validation**: `spring-boot-starter-validation`
+- **Monitoring**: Spring Boot Actuator
+- **Env loading**: `dotenv-java`
 
-### Backend — `CineHub/`
-- **Java** + **Spring Boot**
-- Spring Security + JWT authentication
-- Google OAuth2.0
-- VNPay payment integration
-- Maven (`mvnw`)
+## Project Structure (Layered Architecture)
+Source code: `src/main/java/com/kientran/cinehub`
 
-### User App — `user/`
-- **React** + **Vite** + **TypeScript**
-- React Router, Radix UI, Tailwind CSS
-- HLS.js (video streaming), Embla Carousel
-- Google OAuth (`@react-oauth/google`)
-- Axios
+- `config/` – Application configuration (Spring configs)
+- `controller/` – REST controllers (API endpoints)
+- `service/` – Business logic layer
+- `repository/` – Data access layer (JPA repositories)
+- `entity/` – Domain models/entities
+- `dto/` – Request/Response DTOs
+- `security/` – Security configuration & JWT-related components
+- `exception/` – Custom exceptions & (potential) global exception handling
 
-### Admin Dashboard — `admin/`
-- **React** + **Vite** + **TypeScript**
-- React Router, Radix UI, Tailwind CSS
-- MUI (Material UI), Recharts
-- React Hook Form, XLSX export
-- Drag & Drop (`react-dnd`)
+Main entry point:
+- `CineHubApplication.java`
 
----
+## API Testing
+Repo includes a Postman collection:
+- `ImportAPIPostman.json`
 
-## Getting Started
+## Local Development
+### 1) Configure environment variables
+There is a `.env` file at repository root. Update it to match your local environment.
 
-### Prerequisites
-- **Java 17+** & **Maven** (for backend)
-- **Node.js** (LTS) & **npm** (for frontend apps)
-
----
-
-### 1) Run the Backend
-
+### 2) Run the application
 ```bash
-cd CineHub
-cp .env.example .env   # configure your environment variables
 ./mvnw spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080`.
-
----
-
-### 2) Run the User App
-
+Or on Windows:
 ```bash
-cd user
-npm install
-npm run dev
+mvnw.cmd spring-boot:run
 ```
 
-Runs at `http://localhost:5173` by default.
-
----
-
-### 3) Run the Admin Dashboard
-
-```bash
-cd admin
-npm install
-npm run dev
-```
-
-Runs at `http://localhost:5174` by default.
-
----
-
-## Environment Variables
-
-Each sub-project has its own `.env` file. Refer to the `.env` in each folder for required variables:
-
-| Project | File | Key variables |
-|---------|------|---------------|
-| Backend | `CineHub/.env` | DB credentials, JWT secret, VNPay keys, OAuth2 config |
-| User FE | `user/.env` | API base URL, Google Client ID |
-
----
-
-## Development Notes
-
-- Run each app in its **own terminal** — they are independent.
-- Frontend apps communicate with the backend via REST API — make sure the backend is running first.
-- API collection for testing: `CineHub/ImportAPIPostman.json` (import into Postman).
-
----
-
-## License
-
-[MIT](CineHub/LICENSE)
+## Notes
+- This repository currently targets **PostgreSQL (JPA)** based on the `pom.xml` dependencies.
+- Authentication uses **JWT** (JSON Web Token) via `io.jsonwebtoken (jjwt)` libraries.
