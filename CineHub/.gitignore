@@ -1,0 +1,38 @@
+# Chỉ push user/ và admin/ — bỏ qua backend Java
+CineHub/
+
+# Backup videos
+user/public/*.mp4
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+build/
+**/build/
+
+# Environment files
+user/.env
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# IDE
+.idea/
+**/.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
