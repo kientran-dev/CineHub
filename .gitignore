@@ -12,6 +12,13 @@ dist/
 build/
 **/build/
 
+# Maven build artifacts
+target/
+**/target/
+*.class
+*.jar
+*.war
+
 # Environment files
 user/.env
 .env
