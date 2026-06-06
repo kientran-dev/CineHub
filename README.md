@@ -1,68 +1,108 @@
-# CineHub Frontend (FE)
+# CineHub
 
-Frontend codebase for **CineHub** — a movie streaming platform.
-
-This repository currently contains **two separate frontend apps**:
-
-- **User app** (movie streaming UI): `user/`
-- **Admin dashboard** (management UI): `admin/`
-
-> Note: At the moment, each app has its own standalone setup and `package.json`. You should run/install them **independently**.
+A full-stack movie streaming platform — monorepo containing **backend API**, **user-facing app**, and **admin dashboard**.
 
 ---
 
 ## Repository Structure
 
 ```text
-CineHu/
-├─ user/          # User-facing movie streaming app
-└─ admin/         # Admin dashboard
+CineHub/
+├── CineHub/       # Spring Boot backend (REST API)
+├── user/          # User-facing movie streaming app (React + Vite)
+└── admin/         # Admin dashboard (React + Vite)
 ```
 
 ---
 
-## Tech Stack (high-level)
+## Tech Stack
 
-- Node.js + npm
-- Vite (dev server via `npm run dev`)
-- UI implementation is based on the provided Figma designs:
-  - User: https://www.figma.com/design/yHOfua3kBKpXl07XLVPoLC/Movie-Streaming-App-Design
-  - Admin: https://www.figma.com/design/6nWsH31O6NcPa5BOoEsimq/Admin-dashboard-for-movie-platform
+### Backend — `CineHub/`
+- **Java** + **Spring Boot**
+- Spring Security + JWT authentication
+- Google OAuth2.0
+- VNPay payment integration
+- Maven (`mvnw`)
+
+### User App — `user/`
+- **React** + **Vite** + **TypeScript**
+- React Router, Radix UI, Tailwind CSS
+- HLS.js (video streaming), Embla Carousel
+- Google OAuth (`@react-oauth/google`)
+- Axios
+
+### Admin Dashboard — `admin/`
+- **React** + **Vite** + **TypeScript**
+- React Router, Radix UI, Tailwind CSS
+- MUI (Material UI), Recharts
+- React Hook Form, XLSX export
+- Drag & Drop (`react-dnd`)
 
 ---
 
 ## Getting Started
 
-### 1) Prerequisites
+### Prerequisites
+- **Java 17+** & **Maven** (for backend)
+- **Node.js** (LTS) & **npm** (for frontend apps)
 
-- Node.js (recommend latest LTS)
-- npm (comes with Node.js)
+---
 
-### 2) Run the **User** app
+### 1) Run the Backend
+
+```bash
+cd CineHub
+cp .env.example .env   # configure your environment variables
+./mvnw spring-boot:run
+```
+
+The API will be available at `http://localhost:8080`.
+
+---
+
+### 2) Run the User App
 
 ```bash
 cd user
-npm i
+npm install
 npm run dev
 ```
 
-### 3) Run the **Admin** app
+Runs at `http://localhost:5173` by default.
+
+---
+
+### 3) Run the Admin Dashboard
 
 ```bash
 cd admin
-npm i
+npm install
 npm run dev
 ```
+
+Runs at `http://localhost:5174` by default.
+
+---
+
+## Environment Variables
+
+Each sub-project has its own `.env` file. Refer to the `.env` in each folder for required variables:
+
+| Project | File | Key variables |
+|---------|------|---------------|
+| Backend | `CineHub/.env` | DB credentials, JWT secret, VNPay keys, OAuth2 config |
+| User FE | `user/.env` | API base URL, Google Client ID |
 
 ---
 
 ## Development Notes
 
-- If you need to run both apps at the same time, open **two terminals** and start each app separately.
-- If you plan to connect to a backend (BE) API, you may need to add environment variables (e.g. API base URL) depending on how the FE source code is implemented.
+- Run each app in its **own terminal** — they are independent.
+- Frontend apps communicate with the backend via REST API — make sure the backend is running first.
+- API collection for testing: `CineHub/ImportAPIPostman.json` (import into Postman).
 
 ---
 
 ## License
 
-Add a license if needed.
+[MIT](CineHub/LICENSE)
