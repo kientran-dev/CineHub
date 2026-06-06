@@ -1,68 +1,74 @@
-# CineHub Frontend (FE)
+# CineHub — Backend API
 
-Frontend codebase for **CineHub** — a movie streaming platform.
-
-This repository currently contains **two separate frontend apps**:
-
-- **User app** (movie streaming UI): `user/`
-- **Admin dashboard** (management UI): `admin/`
-
-> Note: At the moment, each app has its own standalone setup and `package.json`. You should run/install them **independently**.
+Spring Boot REST API for **CineHub**, a movie streaming platform.
 
 ---
 
-## Repository Structure
+## Tech Stack
 
-```text
-CineHu/
-├─ user/          # User-facing movie streaming app
-└─ admin/         # Admin dashboard
+- **Java 17** + **Spring Boot**
+- **Spring Security** + **JWT** (access token: 15m, refresh token: 7d)
+- **Google OAuth2.0** authentication
+- **PostgreSQL** database (JPA/Hibernate)
+- **VNPay** payment gateway integration
+- **Gmail SMTP** for email (OTP, password reset)
+- **Maven** build tool
+
+---
+
+## Prerequisites
+
+- Java 17+
+- Maven (or use `./mvnw`)
+- PostgreSQL running locally
+- A `.env` file configured (see below)
+
+---
+
+## Environment Variables
+
+Create a `.env` file in this folder (`CineHub/`) with the following:
+
+```env
+DB_PASSWORD=your_postgres_password
+JWT_SECRET=your_jwt_secret_key
+VNP_HASH_SECRET=your_vnpay_hash_secret
+MAIL_USERNAME=your_gmail_address
+MAIL_PASSWORD=your_gmail_app_password
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
-
----
-
-## Tech Stack (high-level)
-
-- Node.js + npm
-- Vite (dev server via `npm run dev`)
-- UI implementation is based on the provided Figma designs:
-  - User: https://www.figma.com/design/yHOfua3kBKpXl07XLVPoLC/Movie-Streaming-App-Design
-  - Admin: https://www.figma.com/design/6nWsH31O6NcPa5BOoEsimq/Admin-dashboard-for-movie-platform
 
 ---
 
 ## Getting Started
 
-### 1) Prerequisites
-
-- Node.js (recommend latest LTS)
-- npm (comes with Node.js)
-
-### 2) Run the **User** app
-
 ```bash
-cd user
-npm i
-npm run dev
+# Clone the repo (if not already)
+cd CineHub
+
+# Run with Maven wrapper
+./mvnw spring-boot:run
 ```
 
-### 3) Run the **Admin** app
-
-```bash
-cd admin
-npm i
-npm run dev
-```
+The API will be available at: `http://localhost:8080`
 
 ---
 
-## Development Notes
+## API Collection
 
-- If you need to run both apps at the same time, open **two terminals** and start each app separately.
-- If you plan to connect to a backend (BE) API, you may need to add environment variables (e.g. API base URL) depending on how the FE source code is implemented.
+Import `ImportAPIPostman.json` into Postman to test all available endpoints.
+
+---
+
+## Database
+
+- Engine: **PostgreSQL**
+- Default database name: `cinehub`
+- Default host: `localhost:5432`
+- Schema is auto-managed by Hibernate (`ddl-auto=update`)
 
 ---
 
 ## License
 
-Add a license if needed.
+[MIT](LICENSE)
