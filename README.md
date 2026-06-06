@@ -14,7 +14,7 @@ This repository currently contains **two separate frontend apps**:
 ## Repository Structure
 
 ```text
-CineHub_FE/
+CineHu/
 ├─ user/          # User-facing movie streaming app
 └─ admin/         # Admin dashboard
 ```
