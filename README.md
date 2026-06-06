@@ -1,52 +1,90 @@
-# CineHub
+# CineHub — Monorepo
 
-CineHub is a modern cinema management REST API built with **Spring Boot**, **Spring Security**, **JWT authentication**, and **PostgreSQL** (BE).
+Welcome to **CineHub**, a modern movie streaming platform. This repository is organized as a monorepo containing the backend API and two frontend applications.
 
-FE: https://github.com/kientran-dev/CineHub_FE
+---
 
-## Tech Stack
-- **Java**: 17 (configured in `pom.xml`)
-- **Spring Boot**: using `spring-boot-starter-parent` (version defined in `pom.xml`)
-- **Database**: PostgreSQL + Spring Data JPA
-- **Security**: Spring Security + JWT (jjwt)
-- **Build tool**: Maven (`mvnw`, `.mvn/`)
-- **Validation**: `spring-boot-starter-validation`
-- **Monitoring**: Spring Boot Actuator
-- **Env loading**: `dotenv-java`
+## Repository Structure
 
-## Project Structure (Layered Architecture)
-Source code: `src/main/java/com/kientran/cinehub`
+The project is split into three main directories:
 
-- `config/` – Application configuration (Spring configs)
-- `controller/` – REST controllers (API endpoints)
-- `service/` – Business logic layer
-- `repository/` – Data access layer (JPA repositories)
-- `entity/` – Domain models/entities
-- `dto/` – Request/Response DTOs
-- `security/` – Security configuration & JWT-related components
-- `exception/` – Custom exceptions & (potential) global exception handling
+1. **[`CineHub/`](file:///home/kien/Code/CineHub/CineHub)**: Backend REST API built with Spring Boot, Spring Security, JWT, VNPay, and PostgreSQL.
+2. **[`user/`](file:///home/kien/Code/CineHub/user)**: Frontend application for general users (customers) to browse and stream movies.
+3. **[`admin/`](file:///home/kien/Code/CineHub/admin)**: Frontend administration panel for managing movies, genres, users, and transactions.
 
-Main entry point:
-- `CineHubApplication.java`
+---
 
-## API Testing
-Repo includes a Postman collection:
-- `ImportAPIPostman.json`
+## 1. Backend Setup (`CineHub/`)
 
-## Local Development
-### 1) Configure environment variables
-There is a `.env` file at repository root. Update it to match your local environment.
+The backend is built with **Java 17** and **Spring Boot 3.x**.
 
-### 2) Run the application
-```bash
-./mvnw spring-boot:run
-```
+### Prerequisites
+- Java 17+ (JDK)
+- PostgreSQL database
+- Maven (or use the provided `./mvnw` wrapper)
 
-Or on Windows:
-```bash
-mvnw.cmd spring-boot:run
-```
+### Setup & Run
+1. Navigate to the backend directory:
+   ```bash
+   cd CineHub
+   ```
+2. Create and configure your `.env` file (see the [Backend README](file:///home/kien/Code/CineHub/CineHub/README.md) for required keys).
+3. Build and run:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
-## Notes
-- This repository currently targets **PostgreSQL (JPA)** based on the `pom.xml` dependencies.
-- Authentication uses **JWT** (JSON Web Token) via `io.jsonwebtoken (jjwt)` libraries.
+---
+
+## 2. Frontend User Application (`user/`)
+
+A React + TypeScript SPA for users to browse, search, and watch movies.
+
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+
+### Setup & Run
+1. Navigate to the user directory:
+   ```bash
+   cd user
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 3. Frontend Admin Dashboard (`admin/`)
+
+An administrative interface for managing the platform's resources.
+
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+
+### Setup & Run
+1. Navigate to the admin directory:
+   ```bash
+   cd admin
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+For more details on each sub-project, please refer to their respective directory READMEs:
+- [Backend REST API README](file:///home/kien/Code/CineHub/CineHub/README.md)
+- [User Frontend README](file:///home/kien/Code/CineHub/user/README.md)
+- [Admin Frontend README](file:///home/kien/Code/CineHub/admin/README.md)
