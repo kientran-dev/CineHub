@@ -1,38 +1,24 @@
-# Chỉ push user/ và admin/ — bỏ qua backend Java
-CineHub/
-
-# Backup videos
-user/public/*.mp4
-
-# Node modules
-node_modules/
-**/node_modules/
-
-# Build output
-dist/
-**/dist/
-build/
-**/build/
-
-# Environment files
-user/.env
-.env
-.env.local
-.env.*.local
-**/.env
-**/.env.local
+# Spring Boot / Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 # IDE
 .idea/
-**/.idea/
 *.iml
-.vscode/
+*.iws
+.project
+.classpath
+.settings/
 
 # OS
 .DS_Store
 Thumbs.db
-desktop.ini
+
+# Environment
+.env
+*.env.local
 
 # Logs
 *.log
-npm-debug.log*
