@@ -1,0 +1,13 @@
+# Backend .dockerignore
+target/
+*.class
+*.jar
+!target/*.jar
+.git
+.gitignore
+.env
+.env.*
+*.md
+.idea/
+.vscode/
+.mvn/wrapper/maven-wrapper.jar

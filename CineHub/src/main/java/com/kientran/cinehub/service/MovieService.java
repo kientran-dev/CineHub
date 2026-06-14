@@ -178,7 +178,7 @@ public class MovieService {
                     .map(a -> ActorResponse.builder()
                             .id(a.getId())
                             .fullName(a.getFullName())
-                            .imageUrl(a.getImageUrl())
+                            .imageUrl(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(a.getImageUrl()))
                             .build())
                     .collect(Collectors.toList());
         }
@@ -187,8 +187,8 @@ public class MovieService {
                 .id(movie.getId())
                 .title(movie.getTitle())
                 .englishTitle(movie.getEnglishTitle())
-                .thumbnail(movie.getThumbnail())
-                .poster(movie.getPoster())
+                .thumbnail(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(movie.getThumbnail()))
+                .poster(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(movie.getPoster()))
                 .description(movie.getDescription())
                 .director(movie.getDirector())
                 .releaseYear(movie.getReleaseYear())

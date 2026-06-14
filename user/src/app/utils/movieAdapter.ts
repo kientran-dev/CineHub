@@ -13,11 +13,16 @@ function mapType(apiType?: string): 'movie' | 'series' | 'tv_show' {
   return 'movie';
 }
 
+function cleanImageUrl(url?: string): string {
+  if (!url) return '';
+  return url.replace('www.tmdb.org', 'image.tmdb.org');
+}
+
 export function toMovie(m: MovieResponse): Movie {
   // thumbnail: ảnh ngang (backdrop cho banner)
   // poster: ảnh đứng (card dọc). Nếu không có poster riêng, dùng thumbnail
-  const backdrop = m.thumbnail ?? m.poster ?? '';
-  const poster = m.poster ?? m.thumbnail ?? '';
+  const backdrop = cleanImageUrl(m.thumbnail ?? m.poster ?? '');
+  const poster = cleanImageUrl(m.poster ?? m.thumbnail ?? '');
 
   // Derive subtitleType from direct API field (backend now provides this)
   let subtitleType: 'vietsub' | 'thuyetminh' | 'longtieng' | undefined;
@@ -59,7 +64,7 @@ export function toMovie(m: MovieResponse): Movie {
         episodeNumber: e.episodeNumber ?? 0,
         title: e.episodeName ?? '',
         duration: 0,
-        thumbnail: m.thumbnail ?? '',
+        thumbnail: cleanImageUrl(m.thumbnail ?? ''),
         videoUrl: cleanUrl,
         description: e.episodeName ?? '',
         episodeVersions: e.episodeVersions,
@@ -68,7 +73,7 @@ export function toMovie(m: MovieResponse): Movie {
     actors: m.actors?.map(a => ({
       id: String(a.id),
       name: a.fullName ?? '',
-      avatar: a.imageUrl ?? '',
+      avatar: cleanImageUrl(a.imageUrl ?? ''),
       role: '',
     })),
   };

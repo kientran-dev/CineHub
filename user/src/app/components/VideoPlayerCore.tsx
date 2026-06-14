@@ -144,7 +144,7 @@ export default function VideoPlayerCore({
       hlsRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
+  }, [src, storageKey]);
 
   // ── Video event listeners ────────────────────────────────────────────────────
   useEffect(() => {

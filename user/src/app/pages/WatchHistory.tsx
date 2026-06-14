@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Clock, Trash2, Loader2, Play } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import MovieCard from '../components/MovieCard';
 import { historyService, type WatchHistoryResponse } from '../services/historyService';
 import { movieService } from '../services/movieService';
 import { toMovie } from '../utils/movieAdapter';
@@ -126,66 +127,19 @@ export default function WatchHistory() {
         ) : historyItems.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {historyItems.map((movie) => (
-              <div key={movie.historyId} className="flex flex-col group/item">
-                <div className="relative">
-                  {/* Card với click navigate trực tiếp đến đúng tập */}
-                  <div
-                    onClick={() => handleContinueWatch(movie)}
-                    className="cursor-pointer group relative overflow-hidden rounded-lg border border-gray-800/60 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-red-600/60 hover:shadow-xl hover:shadow-red-600/10"
-                  >
-                    <div className="relative aspect-[2/3] overflow-hidden">
-                      <img
-                        src={movie.poster}
-                        alt={movie.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center">
-                        <div className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-red-600/30">
-                          <Play className="h-5 w-5" />
-                          <span className="font-medium">Xem tiếp</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <h3 className="line-clamp-1 font-bold text-sm">{movie.title}</h3>
-                      {movie.englishTitle && (
-                        <p className="line-clamp-1 text-xs text-gray-500 mt-0.5">{movie.englishTitle}</p>
-                      )}
-                      <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-500">
-                        <span>{movie.year}</span>
-                        <span className="w-1 h-1 rounded-full bg-gray-600" />
-                        <span>{movie.type === 'movie' ? 'Phim lẻ' : movie.type === 'tv_show' ? 'TV Show' : 'Phim bộ'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(movie.historyId); }}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 opacity-0 group-hover/item:opacity-100 transition-opacity hover:bg-red-600/80 z-10"
-                    title="Xóa khỏi lịch sử"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-
-                <div className="mt-2 space-y-1 px-1">
-                  <p className="text-xs text-gray-400 h-4">
-                    {movie.currentEpisode ? `Tập ${movie.currentEpisode}` : 'Phim lẻ'}
-                  </p>
-                  <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-700">
-                    <div
-                      className="h-full bg-red-600 transition-all"
-                      style={{ width: `${movie.progressPercent}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Đã xem {movie.progressPercent}%</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {new Date(movie.watchDate).toLocaleDateString('vi-VN')}
-                    </span>
-                  </div>
+              <div key={movie.historyId} className="flex flex-col">
+                <MovieCard
+                  movie={movie}
+                  watchUrl={movie.episodeId ? `/watch/${movie.id}?episode=${movie.episodeId}` : `/watch/${movie.id}`}
+                  progress={movie.progressPercent}
+                  currentEpisode={movie.currentEpisode}
+                  onDelete={() => handleDelete(movie.historyId)}
+                />
+                <div className="mt-1.5 flex items-center justify-between text-[10px] text-gray-500 px-1">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {new Date(movie.watchDate).toLocaleDateString('vi-VN')}
+                  </span>
                 </div>
               </div>
             ))}

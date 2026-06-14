@@ -54,11 +54,11 @@ export default function MovieDetail() {
 
     favoriteService.getFavorites()
       .then(favs => setIsFavorite(favs.some(f => f.movieId === Number(id))))
-      .catch(() => {});
+      .catch(() => { });
 
     ratingService.getMyRating(id)
       .then(r => { if (r) setUserRating(Math.round(r.score / 2)); })
-      .catch(() => {});
+      .catch(() => { });
   }, [isAuthenticated, id]);
 
   const handleToggleFavorite = async () => {
@@ -297,11 +297,10 @@ export default function MovieDetail() {
                       className="transition-transform hover:scale-110"
                     >
                       <Star
-                        className={`h-5 w-5 transition-colors ${
-                          r <= (hoverRating || userRating)
+                        className={`h-5 w-5 transition-colors ${r <= (hoverRating || userRating)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-600'
-                        }`}
+                          }`}
                       />
                     </button>
                   ))}
@@ -313,15 +312,15 @@ export default function MovieDetail() {
                 </div>
 
                 {apiMovie.trailerUrl && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="gap-2 border-gray-600 hover:bg-red-900/20 hover:border-red-500 hover:text-red-400"
-                  onClick={() => setTrailerOpen(true)}
-                >
-                  <Youtube className="h-5 w-5 text-red-500" />
-                  Xem Trailer
-                </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="gap-2 border-gray-600 hover:bg-red-900/20 hover:border-red-500 hover:text-red-400"
+                    onClick={() => setTrailerOpen(true)}
+                  >
+                    <Youtube className="h-5 w-5 text-red-500" />
+                    Xem Trailer
+                  </Button>
                 )}
               </div>
             </div>
@@ -338,8 +337,8 @@ export default function MovieDetail() {
                       {actor.imageUrl
                         ? <img src={actor.imageUrl} alt={actor.fullName} className="w-full h-full object-cover" />
                         : <div className="w-full h-full flex items-center justify-center text-xl font-bold text-gray-400">
-                            {actor.fullName?.charAt(0)}
-                          </div>
+                          {actor.fullName?.charAt(0)}
+                        </div>
                       }
                     </div>
                     <p className="text-sm font-medium text-center whitespace-nowrap">{actor.fullName}</p>

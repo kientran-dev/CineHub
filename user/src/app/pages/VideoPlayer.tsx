@@ -42,35 +42,89 @@ export default function VideoPlayer() {
     }
   }, [isAuthenticated]);
 
-  // Fetch movie data from API
+  // Fetch movie data from API and check watch history for resume
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    movieService.getMovieById(Number(id))
-      .then((data) => {
+
+    async function loadData() {
+      try {
+        const data = await movieService.getMovieById(Number(id));
         setMovie(data);
 
         // Determine which episode to play
+        let targetEpisodeId: number | null = null;
+        let targetVersionType: string = '';
+
         if (data.type?.toUpperCase() === 'MOVIE') {
           // Phim lẻ: chọn episode đầu tiên
           const firstEp = data.episodes?.[0];
           if (firstEp) {
-            setSelectedEpisodeId(firstEp.id);
-            setSelectedVersionType(firstEp.episodeVersions?.[0]?.type || '');
+            targetEpisodeId = firstEp.id;
+            targetVersionType = firstEp.episodeVersions?.[0]?.type || '';
           }
         } else {
           // Phim bộ: chọn theo param hoặc episode đầu
           const epId = episodeParam ? Number(episodeParam) : data.episodes?.[0]?.id;
           if (epId) {
-            setSelectedEpisodeId(epId);
+            targetEpisodeId = epId;
             const ep = data.episodes?.find(e => e.id === epId);
-            setSelectedVersionType(ep?.episodeVersions?.[0]?.type || '');
+            targetVersionType = ep?.episodeVersions?.[0]?.type || '';
           }
         }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [id, episodeParam]);
+
+        // Fetch watch history to restore last saved watch time & episode & version
+        if (isAuthenticated) {
+          try {
+            const history = await historyService.getHistory();
+            const wh = history.find(h => h.movieId === Number(id));
+            if (wh) {
+              // If user didn't specify episodeParam and it is a series, play the last watched episode
+              if (!episodeParam && data.type?.toUpperCase() !== 'MOVIE' && wh.episodeId) {
+                targetEpisodeId = wh.episodeId;
+              }
+
+              // Restore the version type if the target episode matches the one from history
+              if (wh.episodeId === targetEpisodeId || data.type?.toUpperCase() === 'MOVIE') {
+                if (wh.versionType) {
+                  const ep = data.episodes?.find(e => e.id === targetEpisodeId) || data.episodes?.[0];
+                  const versionExists = ep?.episodeVersions?.some(v => v.type === wh.versionType);
+                  if (versionExists) {
+                    targetVersionType = wh.versionType;
+                  }
+                }
+              }
+
+              // Pre-populate progress in localStorage from database so VideoPlayerCore can resume it
+              if (wh.watchTime > 10) {
+                const epIdForStorage = targetEpisodeId ?? 'movie';
+                const versionTypeForStorage = targetVersionType || (data.episodes?.find(e => e.id === targetEpisodeId)?.episodeVersions?.[0]?.type || '');
+                const storageKey = `${user?.username || 'guest'}-${id}-${epIdForStorage}-${versionTypeForStorage}`;
+                
+                const localProgress = parseFloat(localStorage.getItem(`cinehub-progress-${storageKey}`) || '0');
+                if (localProgress < wh.watchTime) {
+                  localStorage.setItem(`cinehub-progress-${storageKey}`, String(wh.watchTime));
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Failed to get watch history for resume:', err);
+          }
+        }
+
+        if (targetEpisodeId) {
+          setSelectedEpisodeId(targetEpisodeId);
+          setSelectedVersionType(targetVersionType);
+        }
+      } catch (err) {
+        console.error('Failed to load movie data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [id, episodeParam, isAuthenticated, user]);
 
   // Get current episode and video URL
   const currentEpisode = movie?.episodes?.find(e => e.id === selectedEpisodeId);

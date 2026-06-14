@@ -56,6 +56,7 @@ public class Movie extends BaseEntity{
     String trailerUrl;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     List<Episode> episodes;
 
     @ManyToMany
@@ -64,6 +65,7 @@ public class Movie extends BaseEntity{
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     Set<Genre> genres;
 
     @ManyToMany
@@ -72,12 +74,14 @@ public class Movie extends BaseEntity{
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "actor_id")
     )
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     List<Actor> actors;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> comments;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     List<Rating> ratings;
     
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)

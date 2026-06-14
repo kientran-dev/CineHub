@@ -77,7 +77,7 @@ public class FavoriteService {
                 .id(favorite.getId())
                 .movieId(favorite.getMovie().getId())
                 .movieTitle(favorite.getMovie().getTitle())
-                .movieThumbnail(favorite.getMovie().getThumbnail())
+                .movieThumbnail(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(favorite.getMovie().getThumbnail()))
                 .addedDate(favorite.getAddedDate())
                 .build();
     }
