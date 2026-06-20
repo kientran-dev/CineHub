@@ -200,7 +200,7 @@ export default function Home() {
 
       {/* Featured Banner */}
       {featuredMovies.length > 0 && (
-        <section className="relative h-[80vh] overflow-hidden">
+        <section className="relative h-[55vh] sm:h-[70vh] md:h-[80vh] overflow-hidden group">
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={featuredIndex}
@@ -224,7 +224,7 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
 
-          <div className="container relative z-10 mx-auto flex h-full items-end px-4 pb-20">
+          <div className="container relative z-10 mx-auto flex h-full items-end px-8 sm:px-16 md:px-24 pb-12 sm:pb-20">
             <AnimatePresence mode="wait">
               <motion.div
                 key={featuredIndex}
@@ -232,7 +232,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="flex items-start gap-6"
+                className="flex items-start gap-6 w-full md:w-auto"
               >
                 {/* === POSTER BÊN TRÁI (ngang hàng với tên phim) === */}
                 <motion.div
@@ -256,12 +256,12 @@ export default function Home() {
                 </motion.div>
 
                 {/* === THÔNG TIN PHIM === */}
-                <div className="space-y-3 max-w-xl">
+                <div className="space-y-2.5 sm:space-y-3 max-w-xl w-full">
                   <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="text-4xl md:text-5xl font-bold drop-shadow-lg leading-tight"
+                    className="text-2xl sm:text-4xl md:text-5xl font-bold drop-shadow-lg leading-tight"
                   >
                     {currentFeatured?.title}
                   </motion.h1>
@@ -270,7 +270,7 @@ export default function Home() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.25 }}
-                      className="text-lg text-gray-300"
+                      className="text-xs sm:text-lg text-gray-300 font-medium"
                     >
                       {currentFeatured.englishTitle}
                     </motion.p>
@@ -279,7 +279,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
-                    className="text-sm md:text-base text-gray-300 line-clamp-3"
+                    className="text-[11px] sm:text-sm md:text-base text-gray-300 line-clamp-2 sm:line-clamp-3"
                   >
                     {currentFeatured?.description}
                   </motion.p>
@@ -287,10 +287,10 @@ export default function Home() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.35 }}
-                    className="flex items-center gap-3 text-sm flex-wrap"
+                    className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-wrap"
                   >
                     {currentFeatured?.imdbRating && (
-                      <span className="flex items-center gap-1 bg-yellow-600 px-3 py-1 rounded font-semibold text-black">
+                      <span className="flex items-center gap-1 bg-yellow-600 px-2 py-0.5 sm:px-3 sm:py-1 rounded font-semibold text-black text-[10px] sm:text-xs">
                         IMDb {currentFeatured.imdbRating}
                       </span>
                     )}
@@ -309,17 +309,17 @@ export default function Home() {
                   >
                     <button
                       onClick={() => navigate(`/movie/${currentFeatured?.id}`)}
-                      className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-all hover:scale-110 shadow-lg shadow-red-600/30"
+                      className="flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-all hover:scale-110 shadow-lg shadow-red-600/30"
                     >
-                      <Play className="h-6 w-6 fill-white" />
+                      <Play className="h-5 w-5 sm:h-6 sm:w-6 fill-white text-white translate-x-0.5" />
                     </button>
                   </motion.div>
                 </div>
               </motion.div>
             </AnimatePresence>
 
-            {/* Mini Thumbnails - góc phải dưới */}
-            <div className="absolute bottom-8 right-8 flex gap-2">
+            {/* Mini Thumbnails - Chỉ hiển thị trên Desktop (md trở lên) */}
+            <div className="absolute bottom-8 right-8 hidden md:flex gap-2">
               {featuredMovies.slice(0, 4).map((movie, idx) => (
                 <button
                   key={movie.id}
@@ -349,23 +349,38 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {/* Mobile indicator dots - Chỉ hiển thị trên Mobile/Tablet (dưới md) */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 md:hidden">
+              {featuredMovies.slice(0, 4).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setDirection(idx > featuredIndex ? 1 : -1);
+                    setFeaturedIndex(idx);
+                  }}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === featuredIndex ? 'w-4 bg-red-600' : 'w-1.5 bg-gray-500/50'
+                    }`}
+                />
+              ))}
+            </div>
           </div>
 
           {featuredMovies.length > 1 && (
             <>
               <button
                 onClick={prevFeatured}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-0 hover:opacity-100 group-hover:opacity-100 scale-90 hover:scale-110 transition-all duration-300 hover:bg-red-600 hover:border-red-500 cursor-pointer"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-70 md:opacity-0 group-hover:opacity-100 hover:!opacity-100 scale-90 hover:scale-110 transition-all duration-300 hover:bg-red-600 hover:border-red-500 cursor-pointer"
                 style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
               <button
                 onClick={nextFeatured}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-0 hover:opacity-100 group-hover:opacity-100 scale-90 hover:scale-110 transition-all duration-300 hover:bg-red-600 hover:border-red-500 cursor-pointer"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-70 md:opacity-0 group-hover:opacity-100 hover:!opacity-100 scale-90 hover:scale-110 transition-all duration-300 hover:bg-red-600 hover:border-red-500 cursor-pointer"
                 style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
             </>
           )}

@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8080/api/v1';
+const BASE_URL = typeof window !== 'undefined'
+  ? (window.location.hostname.includes('cinehub.software')
+      ? 'https://api.cinehub.software/api/v1'
+      : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:8080/api/v1'
+          : `${window.location.protocol}//${window.location.hostname}:8080/api/v1`
+        )
+    )
+  : 'http://localhost:8080/api/v1';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -9,7 +17,9 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token && config.headers) {
+    (config.headers as any).Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 

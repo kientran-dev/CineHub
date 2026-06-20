@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,7 @@ public class RecommendationService {
      * Nếu user chưa có đủ dữ liệu (Cold Start) → trả phim phổ biến.
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "recommendations", key = "#username")
     public List<MovieResponse> getRecommendationsForUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -166,6 +168,7 @@ public class RecommendationService {
      * Sử dụng Item-Based CF: tìm phim có pattern rating giống nhất.
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "similarMovies", key = "#movieId")
     public List<MovieResponse> getSimilarMovies(Long movieId) {
         log.info("\u001B[33m[Similar] Bắt đầu tìm phim tương tự cho Movie ID: {}\u001B[0m", movieId);
 

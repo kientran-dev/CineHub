@@ -3,9 +3,7 @@ services:
   # Spring Boot Backend
   # ─────────────────────────────────────────────
   backend:
-    build:
-      context: ./CineHub
-      dockerfile: Dockerfile
+    image: ${DOCKER_USER}/cinehub-backend:latest
     container_name: cinehub-backend
     restart: unless-stopped
     environment:
@@ -24,7 +22,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     ports:
       - "8080:8080"
     depends_on:
@@ -42,11 +40,7 @@ services:
   # User Frontend (React + Nginx)
   # ─────────────────────────────────────────────
   user-frontend:
-    build:
-      context: ./user
-      dockerfile: Dockerfile
-      args:
-        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    image: ${DOCKER_USER}/cinehub-user:latest
     container_name: cinehub-user
     restart: unless-stopped
     ports:
@@ -61,9 +55,7 @@ services:
   # Admin Frontend (React + Nginx)
   # ─────────────────────────────────────────────
   admin-frontend:
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
+    image: ${DOCKER_USER}/cinehub-admin:latest
     container_name: cinehub-admin
     restart: unless-stopped
     ports:
@@ -75,14 +67,29 @@ services:
       - cinehub-network
 
   # ─────────────────────────────────────────────
+  # Nginx Proxy Manager (Quản lý Domain & SSL HTTPS)
+  # ─────────────────────────────────────────────
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: cinehub-npm
+    restart: unless-stopped
+    ports:
+      - '80:80'   # HTTP cổng công cộng
+      - '443:443' # HTTPS cổng bảo mật công cộng
+      - '81:81'   # Cổng Admin Dashboard để bạn quản lý
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    networks:
+      - cinehub-network
+
+  # ─────────────────────────────────────────────
   # Redis Cache
   # ─────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: cinehub-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     networks:
       - cinehub-network
     healthcheck:
@@ -90,6 +97,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+# ─────────────────────────────────────────────
+# Volumes
+# ─────────────────────────────────────────────
+volumes:
+  npm_data:
+    driver: local
+  npm_letsencrypt:
+    driver: local
 
 # ─────────────────────────────────────────────
 # Networks

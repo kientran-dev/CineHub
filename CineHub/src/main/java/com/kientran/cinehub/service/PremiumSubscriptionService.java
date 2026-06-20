@@ -10,6 +10,8 @@ import com.kientran.cinehub.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class PremiumSubscriptionService {
     UserRepository userRepository;
 
     @Transactional
+    @CacheEvict(value = "activeSubscription", key = "#payment.user.username")
     public void activatePremium(Payment payment) {
         User user = payment.getUser();
         PremiumPackage premiumPackage = payment.getPremiumPackage();
@@ -67,6 +70,7 @@ public class PremiumSubscriptionService {
         }
     }
 
+    @Cacheable(value = "activeSubscription", key = "#username")
     public PremiumSubscriptionResponse getActiveSubscription(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));

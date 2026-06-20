@@ -15,7 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, isLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -108,6 +108,18 @@ export default function Profile() {
     navigate('/');
   };
 
+  if (loading || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-red-600" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
@@ -119,18 +131,6 @@ export default function Profile() {
               Đăng nhập
             </Button>
           </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-red-600" />
         </div>
         <Footer />
       </div>

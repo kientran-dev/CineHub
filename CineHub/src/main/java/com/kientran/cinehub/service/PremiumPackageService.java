@@ -8,6 +8,8 @@ import com.kientran.cinehub.repository.PremiumPackageRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class PremiumPackageService {
     PremiumPackageRepository premiumPackageRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "premiumPackages", key = "'all'")
     public List<PremiumPackageResponse> getAllPackages() {
         return premiumPackageRepository.findAll().stream()
                 .map(this::mapToResponse)
@@ -31,6 +34,7 @@ public class PremiumPackageService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = "premiumPackages", key = "#id")
     public PremiumPackageResponse getPackageById(Long id) {
         PremiumPackage pkg = premiumPackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Package not found"));
@@ -38,6 +42,7 @@ public class PremiumPackageService {
     }
 
     @Transactional
+    @CacheEvict(value = "premiumPackages", allEntries = true)
     public PremiumPackageResponse createPackage(PremiumPackageRequest request) {
         PremiumPackage pkg = PremiumPackage.builder()
                 .packageName(request.getPackageName())
@@ -50,6 +55,7 @@ public class PremiumPackageService {
     }
 
     @Transactional
+    @CacheEvict(value = "premiumPackages", allEntries = true)
     public PremiumPackageResponse updatePackage(Long id, PremiumPackageRequest request) {
         PremiumPackage pkg = premiumPackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Package not found"));
@@ -62,6 +68,7 @@ public class PremiumPackageService {
     }
 
     @Transactional
+    @CacheEvict(value = "premiumPackages", allEntries = true)
     public void deletePackage(Long id) {
         if (!premiumPackageRepository.existsById(id)) {
             throw new RuntimeException("Package not found");

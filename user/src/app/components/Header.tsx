@@ -165,13 +165,15 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-gray-800/50 bg-[#0a0a0a]/95 backdrop-blur-md">
       <div className="container mx-auto flex h-20 items-center gap-6 px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-red-600">
+        <Link to="/" className="flex items-center gap-2 text-red-600 group hover:scale-[1.02] transition-transform duration-300">
           <Film className="h-8 w-8" />
-          <span className="text-2xl font-bold">CineHub</span>
+          <span className="text-2xl font-bold tracking-wider select-none">
+            CineHub
+          </span>
         </Link>
-
+        
         {/* Search with Autocomplete */}
-        <div ref={searchRef} className="relative flex-1 max-w-lg">
+        <div ref={searchRef} className="relative flex-1 max-w-lg hidden sm:block">
           <form onSubmit={handleSearch}>
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 z-10" />
             <Input
@@ -238,14 +240,7 @@ export default function Header() {
           )}
         </div>
 
-        {/* Hamburger button — visible on < lg */}
-        <button
-          className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors"
-          onClick={() => setMobileMenuOpen(v => !v)}
-          aria-label="Menu"
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+
 
         {/* Navigation — desktop */}
         <nav className="hidden lg:flex items-center gap-6">
@@ -360,12 +355,35 @@ export default function Header() {
             Đăng nhập
           </Button>
         )}
+
+        {/* Hamburger button — visible on < lg */}
+        <button
+          className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors flex-shrink-0"
+          onClick={() => setMobileMenuOpen(v => !v)}
+          aria-label="Menu"
+        >
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
 
       {/* Mobile menu panel */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-800/50 bg-[#0a0a0a]/98 backdrop-blur-md animate-in slide-in-from-top-2 duration-200">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-1">
+            {/* Mobile Search */}
+            <div className="sm:hidden px-4 py-2">
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 z-10" />
+                <Input
+                  type="search"
+                  placeholder="Tìm kiếm phim..."
+                  className="pl-10 bg-gray-900 border-gray-700 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+            </div>
+
             <Link to="/movies/phim-le" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg text-base hover:bg-gray-800 hover:text-red-500 transition-colors">
               Phim lẻ
             </Link>
