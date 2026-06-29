@@ -33,7 +33,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // 1. PUBLIC: Ai cũng có quyền truy cập
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/payments/vnpay-return").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/payments/vnpay-return", "/actuator/health", "/actuator/prometheus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/recommendations/similar/**").permitAll()
 
@@ -70,11 +70,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:5173", // User frontend
-                "http://localhost:5174"  // Admin frontend
-        ));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

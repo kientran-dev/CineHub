@@ -26,5 +26,6 @@ public class Episode extends BaseEntity{
     String episodeName;
 
     @OneToMany(mappedBy = "episode")
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     List<EpisodeVersion> episodeVersions;
 }

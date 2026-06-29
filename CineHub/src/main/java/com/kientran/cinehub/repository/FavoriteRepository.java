@@ -15,4 +15,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     @Query("SELECT f.movie.id FROM Favorite f WHERE f.user.id = :userId")
     List<Long> findFavoriteMovieIdsByUserId(Long userId);
+
+    @Query("SELECT f.user.id, f.movie.id FROM Favorite f")
+    List<Object[]> findAllUserMovieIds();
 }

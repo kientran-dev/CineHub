@@ -1,0 +1,144 @@
+services:
+  # ─────────────────────────────────────────────
+  # Spring Boot Backend
+  # ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ./CineHub
+      dockerfile: Dockerfile
+    container_name: cinehub-backend
+    restart: unless-stopped
+    environment:
+      # Sử dụng cấu hình database từ file .env (Supabase)
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      VNP_HASH_SECRET: ${VNP_HASH_SECRET}
+      VNP_RETURN_URL: ${VNP_RETURN_URL}
+      VNP_FRONTEND_REDIRECT_URL: ${VNP_FRONTEND_REDIRECT_URL}
+      VNP_TMN_CODE: ${VNP_TMN_CODE}
+      VNP_API_URL: ${VNP_API_URL}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    networks:
+      - cinehub-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ─────────────────────────────────────────────
+  # User Frontend (React + Nginx)
+  # ─────────────────────────────────────────────
+  user-frontend:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    container_name: cinehub-user
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - cinehub-network
+
+  # ─────────────────────────────────────────────
+  # Admin Frontend (React + Nginx)
+  # ─────────────────────────────────────────────
+  admin-frontend:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: cinehub-admin
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - cinehub-network
+
+  # ─────────────────────────────────────────────
+  # Redis Cache
+  # ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: cinehub-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - cinehub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ─────────────────────────────────────────────
+  # Prometheus Monitoring Server
+  # ─────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cinehub-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - cinehub-network
+
+  # ─────────────────────────────────────────────
+  # Grafana Dashboard UI
+  # ─────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: cinehub-grafana
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - cinehub-network
+
+# ─────────────────────────────────────────────
+# Volumes
+# ─────────────────────────────────────────────
+volumes:
+  prometheus_data:
+  grafana_data:
+
+# ─────────────────────────────────────────────
+# Networks
+# ─────────────────────────────────────────────
+networks:
+  cinehub-network:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "172.28.0.0/16"
+        - subnet: "fd00:db8:1::/64"

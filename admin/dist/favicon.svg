@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Vibrant primary gradient (red-orange glow) -->
+    <linearGradient id="redGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a3b" />
+      <stop offset="50%" stop-color="#e50914" />
+      <stop offset="100%" stop-color="#9b000a" />
+    </linearGradient>
+
+    <!-- Premium gold gradient -->
+    <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe259" />
+      <stop offset="100%" stop-color="#ffa751" />
+    </linearGradient>
+
+    <!-- Drop shadow for 3D effect -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Logo Group on Transparent Background -->
+  <g filter="url(#shadow)">
+    <!-- Stylized "C" Ribbon -->
+    <path d="M 370,140 
+             C 320,80 200,80 140,140 
+             C 70,210 70,302 140,372 
+             C 200,432 320,432 370,372
+             L 320,322
+             C 290,352 220,352 182,322
+             C 144,284 144,228 182,190
+             C 220,160 290,160 320,190
+             Z" 
+          fill="url(#redGlow)" />
+
+    <!-- Play button in the center -->
+    <path d="M 225,186 
+             C 225,178 234,173 241,177 
+             L 345,247 
+             C 351,251 351,261 345,265 
+             L 241,335 
+             C 234,339 225,334 225,326 
+             Z" 
+          fill="url(#goldGlow)"
+          filter="url(#glow)" />
+  </g>
+</svg>

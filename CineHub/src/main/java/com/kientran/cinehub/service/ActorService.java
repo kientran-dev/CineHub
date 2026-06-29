@@ -44,7 +44,7 @@ public class ActorService {
         return ActorResponse.builder()
                 .id(actor.getId())
                 .fullName(actor.getFullName())
-                .imageUrl(actor.getImageUrl())
+                .imageUrl(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(actor.getImageUrl()))
                 .build();
     }
 }

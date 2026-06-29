@@ -12,13 +12,34 @@ import { useAuth } from '../contexts/AuthContext';
 import { toMovieList, toMovie } from '../utils/movieAdapter';
 import type { Movie } from '../data/mockData';
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04
+    }
+  }
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 120, damping: 14 }
+  }
+} as const;
+
 export default function Home() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [continueWatching, setContinueWatching] = useState<Array<Movie & { progress: number }>>([]);
+  const [continueWatching, setContinueWatching] = useState<Array<Movie & { progress: number; episodeId?: number; currentEpisode?: number; watchTime?: number }>>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,12 +55,14 @@ export default function Home() {
   useEffect(() => {
     if (!isAuthenticated) {
       setContinueWatching([]);
+      setLoadingHistory(false);
       return;
     }
+    setLoadingHistory(true);
     historyService.getHistory().then(history => {
       // Lấy phim tương ứng từ danh sách movies đã fetch
       movieService.getAllMovies().then(allMovies => {
-        const uniqueMovies = new Map<number, Movie & { progress: number; watchDate: string }>();
+        const uniqueMovies = new Map<number, Movie & { progress: number; watchDate: string; episodeId?: number; currentEpisode?: number; watchTime?: number }>();
 
         history.forEach(wh => {
           // Khớp theo movieId (vừa bổ sung vào API) hoặc fallback theo Title
@@ -50,10 +73,13 @@ export default function Home() {
             ? Math.round((wh.watchTime / (apiMovie.duration! * 60)) * 100)
             : 0;
 
-          const movieWithProgress = { 
-            ...toMovie(apiMovie), 
+          const movieWithProgress = {
+            ...toMovie(apiMovie),
             progress: Math.min(progress, 100),
-            watchDate: wh.watchDate 
+            watchDate: wh.watchDate,
+            episodeId: wh.episodeId,
+            currentEpisode: wh.currentEpisode,
+            watchTime: wh.watchTime
           };
 
           // Nếu phim này đã có trong Map, chỉ giữ lại bản ghi có ngày xem mới nhất
@@ -66,10 +92,15 @@ export default function Home() {
         // Chuyển Map thành mảng và sắp xếp theo ngày xem mới nhất
         const sorted = Array.from(uniqueMovies.values())
           .sort((a, b) => new Date(b.watchDate).getTime() - new Date(a.watchDate).getTime());
-          
+
         setContinueWatching(sorted);
-      });
-    }).catch(() => setContinueWatching([]));
+      }).catch(console.error)
+      .finally(() => setLoadingHistory(false));
+    }).catch((err) => {
+      console.error(err);
+      setContinueWatching([]);
+      setLoadingHistory(false);
+    });
   }, [isAuthenticated]);
 
   // Fetch recommendations từ Collaborative Filtering API
@@ -116,8 +147,30 @@ export default function Home() {
   };
 
   const cwRef = useRef<HTMLDivElement>(null);
+  const [canScrollCWLeft, setCanScrollCWLeft] = useState(false);
+  const [canScrollCWRight, setCanScrollCWRight] = useState(true);
+
+  const checkCWScroll = () => {
+    const el = cwRef.current;
+    if (!el) return;
+    setCanScrollCWLeft(el.scrollLeft > 0);
+    setCanScrollCWRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+  };
+
+  useEffect(() => {
+    checkCWScroll();
+    const el = cwRef.current;
+    if (el) {
+      el.addEventListener('scroll', checkCWScroll);
+      return () => el.removeEventListener('scroll', checkCWScroll);
+    }
+  }, [continueWatching]);
+
   const scrollCW = (dir: 'left' | 'right') => {
-    cwRef.current?.scrollBy({ left: dir === 'left' ? -400 : 400, behavior: 'smooth' });
+    const el = cwRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.8;
+    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
   };
 
   const slideVariants = {
@@ -147,7 +200,7 @@ export default function Home() {
 
       {/* Featured Banner */}
       {featuredMovies.length > 0 && (
-        <section className="relative h-[80vh] overflow-hidden">
+        <section className="relative h-[55vh] sm:h-[70vh] md:h-[80vh] overflow-hidden group">
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={featuredIndex}
@@ -171,7 +224,7 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
 
-          <div className="container relative z-10 mx-auto flex h-full items-end px-4 pb-20">
+          <div className="container relative z-10 mx-auto flex h-full items-end px-8 sm:px-16 md:px-24 pb-12 sm:pb-20">
             <AnimatePresence mode="wait">
               <motion.div
                 key={featuredIndex}
@@ -179,10 +232,15 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="flex items-start gap-6"
+                className="flex items-start gap-6 w-full md:w-auto"
               >
                 {/* === POSTER BÊN TRÁI (ngang hàng với tên phim) === */}
-                <div className="hidden sm:block flex-shrink-0">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.15, type: 'spring', stiffness: 100, damping: 15 }}
+                  className="hidden sm:block flex-shrink-0"
+                >
                   <div className="relative w-36 md:w-44 rounded-xl overflow-hidden shadow-2xl ring-2 ring-white/15 group">
                     <img
                       src={currentFeatured?.poster}
@@ -195,22 +253,44 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     <div className="absolute inset-0 ring-inset ring-1 ring-white/10 rounded-xl" />
                   </div>
-                </div>
+                </motion.div>
 
                 {/* === THÔNG TIN PHIM === */}
-                <div className="space-y-3 max-w-xl">
-                  <h1 className="text-4xl md:text-5xl font-bold drop-shadow-lg leading-tight">
+                <div className="space-y-2.5 sm:space-y-3 max-w-xl w-full">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="text-2xl sm:text-4xl md:text-5xl font-bold drop-shadow-lg leading-tight"
+                  >
                     {currentFeatured?.title}
-                  </h1>
+                  </motion.h1>
                   {currentFeatured?.englishTitle && (
-                    <p className="text-lg text-gray-300">{currentFeatured.englishTitle}</p>
+                    <motion.p
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.25 }}
+                      className="text-xs sm:text-lg text-gray-300 font-medium"
+                    >
+                      {currentFeatured.englishTitle}
+                    </motion.p>
                   )}
-                  <p className="text-sm md:text-base text-gray-300 line-clamp-3">
+                  <motion.p
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="text-[11px] sm:text-sm md:text-base text-gray-300 line-clamp-2 sm:line-clamp-3"
+                  >
                     {currentFeatured?.description}
-                  </p>
-                  <div className="flex items-center gap-3 text-sm flex-wrap">
+                  </motion.p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.35 }}
+                    className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-wrap"
+                  >
                     {currentFeatured?.imdbRating && (
-                      <span className="flex items-center gap-1 bg-yellow-600 px-3 py-1 rounded font-semibold text-black">
+                      <span className="flex items-center gap-1 bg-yellow-600 px-2 py-0.5 sm:px-3 sm:py-1 rounded font-semibold text-black text-[10px] sm:text-xs">
                         IMDb {currentFeatured.imdbRating}
                       </span>
                     )}
@@ -220,21 +300,26 @@ export default function Home() {
                     {currentFeatured?.duration > 0 && (
                       <span className="text-gray-300">{currentFeatured.duration} phút</span>
                     )}
-                  </div>
-                  <div className="pt-1">
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4, type: 'spring', stiffness: 200, damping: 12 }}
+                    className="pt-1"
+                  >
                     <button
                       onClick={() => navigate(`/movie/${currentFeatured?.id}`)}
-                      className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-all hover:scale-110 shadow-lg shadow-red-600/30"
+                      className="flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-all hover:scale-110 shadow-lg shadow-red-600/30"
                     >
-                      <Play className="h-6 w-6 fill-white" />
+                      <Play className="h-5 w-5 sm:h-6 sm:w-6 fill-white text-white translate-x-0.5" />
                     </button>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </AnimatePresence>
 
-            {/* Mini Thumbnails - góc phải dưới */}
-            <div className="absolute bottom-8 right-8 flex gap-2">
+            {/* Mini Thumbnails - Chỉ hiển thị trên Desktop (md trở lên) */}
+            <div className="absolute bottom-8 right-8 hidden md:flex gap-2">
               {featuredMovies.slice(0, 4).map((movie, idx) => (
                 <button
                   key={movie.id}
@@ -242,11 +327,10 @@ export default function Home() {
                     setDirection(idx > featuredIndex ? 1 : -1);
                     setFeaturedIndex(idx);
                   }}
-                  className={`relative h-20 w-32 overflow-hidden rounded-lg border-2 transition-all ${
-                    idx === featuredIndex
+                  className={`relative h-20 w-32 overflow-hidden rounded-lg border-2 transition-all ${idx === featuredIndex
                       ? 'border-red-600 scale-110 shadow-lg shadow-red-600/20'
                       : 'border-gray-700/50 opacity-60 hover:opacity-100'
-                  }`}
+                    }`}
                 >
                   <img
                     src={movie.poster || movie.backdrop}
@@ -265,17 +349,38 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {/* Mobile indicator dots - Chỉ hiển thị trên Mobile/Tablet (dưới md) */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 md:hidden">
+              {featuredMovies.slice(0, 4).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setDirection(idx > featuredIndex ? 1 : -1);
+                    setFeaturedIndex(idx);
+                  }}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === featuredIndex ? 'w-4 bg-red-600' : 'w-1.5 bg-gray-500/50'
+                    }`}
+                />
+              ))}
+            </div>
           </div>
-
-
 
           {featuredMovies.length > 1 && (
             <>
-              <button onClick={prevFeatured} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/40 p-2 hover:bg-black/70 backdrop-blur-sm transition-colors border border-white/10">
-                <ChevronLeft className="h-8 w-8" />
+              <button
+                onClick={prevFeatured}
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-70 md:opacity-0 group-hover:opacity-100 hover:!opacity-100 scale-90 hover:scale-110 transition-all duration-300 hover:bg-red-600 hover:border-red-500 cursor-pointer"
+                style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+              >
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
-              <button onClick={nextFeatured} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/40 p-2 hover:bg-black/70 backdrop-blur-sm transition-colors border border-white/10">
-                <ChevronRight className="h-8 w-8" />
+              <button
+                onClick={nextFeatured}
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-70 md:opacity-0 group-hover:opacity-100 hover:!opacity-100 scale-90 hover:scale-110 transition-all duration-300 hover:bg-red-600 hover:border-red-500 cursor-pointer"
+                style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+              >
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
             </>
           )}
@@ -283,29 +388,81 @@ export default function Home() {
       )}
 
       {/* Continue Watching */}
-      {continueWatching.length > 0 && (
+      {isAuthenticated && (loadingHistory || continueWatching.length > 0) && (
         <section className="relative py-8">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a]" />
           <div className="container relative mx-auto px-4">
-            <h2 className="mb-4 text-2xl font-bold">Tiếp tục xem</h2>
-            <div className="relative group/row">
-              <button onClick={() => scrollCW('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-full px-2 bg-gradient-to-r from-[#0f0f0f] to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity">
-                <ChevronLeft className="h-8 w-8" />
-              </button>
-              <div ref={cwRef} className="flex gap-4 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-                {continueWatching.map((movie) => (
-                  <div key={movie.id} className="flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px] space-y-2">
-                    <MovieCard movie={movie} />
-                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-800">
-                      <div className="h-full bg-red-600 shadow-sm shadow-red-600/50" style={{ width: `${movie.progress}%` }} />
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-2xl font-bold">Tiếp tục xem</h2>
+              {loadingHistory && (
+                <Loader2 className="h-5 w-5 animate-spin text-red-600" />
+              )}
+            </div>
+
+            {loadingHistory ? (
+              // Skeleton Loading placeholder cards
+              <div className="flex gap-4 overflow-x-hidden py-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px] space-y-3 animate-pulse">
+                    <div className="aspect-[2/3] w-full rounded-xl bg-gray-900/80 border border-gray-800/60" />
+                    <div className="space-y-2 px-1">
+                      <div className="h-4 w-3/4 rounded bg-gray-800" />
+                      <div className="h-3 w-1/2 rounded bg-gray-800" />
                     </div>
                   </div>
                 ))}
               </div>
-              <button onClick={() => scrollCW('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full px-2 bg-gradient-to-l from-[#0f0f0f] to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity">
-                <ChevronRight className="h-8 w-8" />
-              </button>
-            </div>
+            ) : (
+              <div className="relative group/row">
+                {/* Left Arrow */}
+                {canScrollCWLeft && (
+                  <button
+                    onClick={() => scrollCW('left')}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-0 scale-90 group-hover/row:opacity-100 group-hover/row:scale-100 transition-all duration-300 hover:bg-red-600 hover:border-red-500 hover:scale-110 cursor-pointer"
+                    style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                )}
+
+                {/* Scrollable Row with Staggered Framer Motion */}
+                <motion.div
+                  ref={cwRef}
+                  variants={containerVariants}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, margin: "-80px" }}
+                  className="flex gap-4 overflow-x-auto py-3 scrollbar-hide"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {continueWatching.map((movie) => (
+                    <motion.div
+                      key={movie.id}
+                      variants={itemVariants}
+                      className="flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px]"
+                    >
+                      <MovieCard
+                        movie={movie}
+                        watchUrl={movie.episodeId ? `/watch/${movie.id}?episode=${movie.episodeId}` : `/watch/${movie.id}`}
+                        progress={movie.progress}
+                        currentEpisode={movie.currentEpisode}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* Right Arrow */}
+                {canScrollCWRight && (
+                  <button
+                    onClick={() => scrollCW('right')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-0 scale-90 group-hover/row:opacity-100 group-hover/row:scale-100 transition-all duration-300 hover:bg-red-600 hover:border-red-500 hover:scale-110 cursor-pointer"
+                    style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -425,24 +582,76 @@ export default function Home() {
 
 function ScrollRow({ movies: movieList }: { movies: Movie[] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const scroll = (dir: 'left' | 'right') => {
-    ref.current?.scrollBy({ left: dir === 'left' ? -400 : 400, behavior: 'smooth' });
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    const el = ref.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
   };
+
+  useEffect(() => {
+    checkScroll();
+    const el = ref.current;
+    if (el) {
+      el.addEventListener('scroll', checkScroll);
+      return () => el.removeEventListener('scroll', checkScroll);
+    }
+  }, [movieList]);
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = ref.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.8;
+    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
+
   return (
     <div className="relative group/row">
-      <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-full px-2 bg-gradient-to-r from-[#110a0a] to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity">
-        <ChevronLeft className="h-8 w-8" />
-      </button>
-      <div ref={ref} className="flex gap-4 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      {/* Left Arrow */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-0 scale-90 group-hover/row:opacity-100 group-hover/row:scale-100 transition-all duration-300 hover:bg-red-600 hover:border-red-500 hover:scale-110 cursor-pointer"
+          style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+      )}
+
+      {/* Scrollable Row with Staggered Framer Motion */}
+      <motion.div
+        ref={ref}
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        className="flex gap-4 overflow-x-auto py-3 scrollbar-hide"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         {movieList.map((movie) => (
-          <div key={movie.id} className="flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px]">
+          <motion.div
+            key={movie.id}
+            variants={itemVariants}
+            className="flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px]"
+          >
             <MovieCard movie={movie} />
-          </div>
+          </motion.div>
         ))}
-      </div>
-      <button onClick={() => scroll('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full px-2 bg-gradient-to-l from-[#110a0a] to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity">
-        <ChevronRight className="h-8 w-8" />
-      </button>
+      </motion.div>
+
+      {/* Right Arrow */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white border border-white/10 shadow-lg backdrop-blur-md opacity-0 scale-90 group-hover/row:opacity-100 group-hover/row:scale-100 transition-all duration-300 hover:bg-red-600 hover:border-red-500 hover:scale-110 cursor-pointer"
+          style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+      )}
     </div>
   );
 }

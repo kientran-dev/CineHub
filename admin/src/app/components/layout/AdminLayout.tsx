@@ -48,10 +48,35 @@ export function AdminLayout() {
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b border-gray-700">
           {isSidebarOpen && (
-            <div className="flex items-center gap-2">
-              <Film className="text-blue-400" size={28} />
-              <span className="font-semibold text-lg">MovieAdmin</span>
-            </div>
+            <Link to="/" className="flex items-center gap-2 group transition-transform duration-300 hover:scale-[1.02]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-7 w-7 filter drop-shadow-[0_2px_8px_rgba(229,9,20,0.2)]">
+                <defs>
+                  <linearGradient id="redGlowLayout" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ff2a3b" />
+                    <stop offset="50%" stopColor="#e50914" />
+                    <stop offset="100%" stopColor="#9b000a" />
+                  </linearGradient>
+                  <linearGradient id="goldGlowLayout" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ffe259" />
+                    <stop offset="100%" stopColor="#ffa751" />
+                  </linearGradient>
+                  <filter id="glowLayout" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="8" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                <g>
+                  <path d="M 370,140 C 320,80 200,80 140,140 C 70,210 70,302 140,372 C 200,432 320,432 370,372 L 320,322 C 290,352 220,352 182,322 C 144,284 144,228 182,190 C 220,160 290,160 320,190 Z" fill="url(#redGlowLayout)" />
+                  <path d="M 225,186 C 225,178 234,173 241,177 L 345,247 C 351,251 351,261 345,265 L 241,335 C 234,339 225,334 225,326 Z" fill="url(#goldGlowLayout)" filter="url(#glowLayout)" />
+                </g>
+              </svg>
+              <span className="font-black text-base tracking-wider text-white">
+                Cine<span className="text-red-500">Hub</span><span className="text-gray-400 font-normal text-xs ml-1">Admin</span>
+              </span>
+            </Link>
           )}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}

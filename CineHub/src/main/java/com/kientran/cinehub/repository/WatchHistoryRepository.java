@@ -24,4 +24,7 @@ public interface WatchHistoryRepository extends JpaRepository<WatchHistory, Long
 
     @Query("SELECT wh FROM WatchHistory wh WHERE wh.episodeVersion.episode.movie.id = :movieId")
     List<WatchHistory> findByMovieId(Long movieId);
+
+    @Query("SELECT wh.user.id, wh.episodeVersion.episode.movie.id FROM WatchHistory wh")
+    List<Object[]> findAllUserMovieIds();
 }

@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,10 @@ import java.util.List;
 public class PaymentController {
 
     PaymentService paymentService;
+
+    @Value("${vnpay.frontend-redirect-url}")
+    @NonFinal
+    String frontendRedirectUrl;
 
     @GetMapping
     public ResponseEntity<List<PaymentResponse>> getAllPayments() {
@@ -49,9 +55,9 @@ public class PaymentController {
         PaymentResponse result = paymentService.processPaymentCallback(request);
         if ("SUCCESS".equals(result.getStatus())) {
             // Thanh toán thành công, chuyển hướng về trang profile hoặc trang thông báo
-            response.sendRedirect("http://localhost:5173/profile?payment=success");
+            response.sendRedirect(frontendRedirectUrl + "?payment=success");
         } else {
-            response.sendRedirect("http://localhost:5173/profile?payment=failed");
+            response.sendRedirect(frontendRedirectUrl + "?payment=failed");
         }
     }
 

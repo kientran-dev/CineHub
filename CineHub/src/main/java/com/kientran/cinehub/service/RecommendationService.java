@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,7 @@ public class RecommendationService {
      * Nếu user chưa có đủ dữ liệu (Cold Start) → trả phim phổ biến.
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "recommendations", key = "#username")
     public List<MovieResponse> getRecommendationsForUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -166,6 +168,7 @@ public class RecommendationService {
      * Sử dụng Item-Based CF: tìm phim có pattern rating giống nhất.
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "similarMovies", key = "#movieId")
     public List<MovieResponse> getSimilarMovies(Long movieId) {
         log.info("\u001B[33m[Similar] Bắt đầu tìm phim tương tự cho Movie ID: {}\u001B[0m", movieId);
 
@@ -248,26 +251,37 @@ public class RecommendationService {
         Map<Long, Map<Long, Double>> matrix = new HashMap<>();
 
         // 1. Từ bảng Rating (explicit feedback — ưu tiên cao nhất)
-        List<Rating> allRatings = ratingRepository.findAll();
-        for (Rating r : allRatings) {
-            matrix.computeIfAbsent(r.getUser().getId(), k -> new HashMap<>())
-                    .put(r.getMovie().getId(), r.getScore());
+        List<Object[]> allRatings = ratingRepository.findAllUserMovieScores();
+        for (Object[] r : allRatings) {
+            Long userId = (Long) r[0];
+            Long movieId = (Long) r[1];
+            Double score = (Double) r[2];
+            if (userId != null && movieId != null && score != null) {
+                matrix.computeIfAbsent(userId, k -> new HashMap<>())
+                        .put(movieId, score);
+            }
         }
 
         // 2. Từ bảng Favorite (implicit feedback)
-        List<Favorite> allFavorites = favoriteRepository.findAll();
-        for (Favorite f : allFavorites) {
-            matrix.computeIfAbsent(f.getUser().getId(), k -> new HashMap<>())
-                    .putIfAbsent(f.getMovie().getId(), FAVORITE_SCORE); // Không ghi đè rating
+        List<Object[]> allFavorites = favoriteRepository.findAllUserMovieIds();
+        for (Object[] f : allFavorites) {
+            Long userId = (Long) f[0];
+            Long movieId = (Long) f[1];
+            if (userId != null && movieId != null) {
+                matrix.computeIfAbsent(userId, k -> new HashMap<>())
+                        .putIfAbsent(movieId, FAVORITE_SCORE); // Không ghi đè rating
+            }
         }
 
         // 3. Từ bảng WatchHistory (implicit feedback)
-        List<WatchHistory> allHistory = watchHistoryRepository.findAll();
-        for (WatchHistory wh : allHistory) {
-            Long uId = wh.getUser().getId();
-            Long mId = wh.getEpisodeVersion().getEpisode().getMovie().getId();
-            matrix.computeIfAbsent(uId, k -> new HashMap<>())
-                    .putIfAbsent(mId, WATCHED_SCORE); // Không ghi đè rating hoặc favorite
+        List<Object[]> allHistory = watchHistoryRepository.findAllUserMovieIds();
+        for (Object[] wh : allHistory) {
+            Long userId = (Long) wh[0];
+            Long movieId = (Long) wh[1];
+            if (userId != null && movieId != null) {
+                matrix.computeIfAbsent(userId, k -> new HashMap<>())
+                        .putIfAbsent(movieId, WATCHED_SCORE); // Không ghi đè rating hoặc favorite
+            }
         }
 
         log.info("\u001B[36m[Matrix] Xây dựng xong. Có {} users tham gia vào ma trận.\u001B[0m", matrix.size());

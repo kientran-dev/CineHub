@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router';
-import { ArrowLeft, Play, Loader2 } from 'lucide-react';
+import { ArrowLeft, Play, Loader2, Crown } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import VideoPlayerCore from '../components/VideoPlayerCore';
@@ -42,35 +42,89 @@ export default function VideoPlayer() {
     }
   }, [isAuthenticated]);
 
-  // Fetch movie data from API
+  // Fetch movie data from API and check watch history for resume
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    movieService.getMovieById(Number(id))
-      .then((data) => {
+
+    async function loadData() {
+      try {
+        const data = await movieService.getMovieById(Number(id));
         setMovie(data);
 
         // Determine which episode to play
+        let targetEpisodeId: number | null = null;
+        let targetVersionType: string = '';
+
         if (data.type?.toUpperCase() === 'MOVIE') {
           // Phim lẻ: chọn episode đầu tiên
           const firstEp = data.episodes?.[0];
           if (firstEp) {
-            setSelectedEpisodeId(firstEp.id);
-            setSelectedVersionType(firstEp.episodeVersions?.[0]?.type || '');
+            targetEpisodeId = firstEp.id;
+            targetVersionType = firstEp.episodeVersions?.[0]?.type || '';
           }
         } else {
           // Phim bộ: chọn theo param hoặc episode đầu
           const epId = episodeParam ? Number(episodeParam) : data.episodes?.[0]?.id;
           if (epId) {
-            setSelectedEpisodeId(epId);
+            targetEpisodeId = epId;
             const ep = data.episodes?.find(e => e.id === epId);
-            setSelectedVersionType(ep?.episodeVersions?.[0]?.type || '');
+            targetVersionType = ep?.episodeVersions?.[0]?.type || '';
           }
         }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [id, episodeParam]);
+
+        // Fetch watch history to restore last saved watch time & episode & version
+        if (isAuthenticated) {
+          try {
+            const history = await historyService.getHistory();
+            const wh = history.find(h => h.movieId === Number(id));
+            if (wh) {
+              // If user didn't specify episodeParam and it is a series, play the last watched episode
+              if (!episodeParam && data.type?.toUpperCase() !== 'MOVIE' && wh.episodeId) {
+                targetEpisodeId = wh.episodeId;
+              }
+
+              // Restore the version type if the target episode matches the one from history
+              if (wh.episodeId === targetEpisodeId || data.type?.toUpperCase() === 'MOVIE') {
+                if (wh.versionType) {
+                  const ep = data.episodes?.find(e => e.id === targetEpisodeId) || data.episodes?.[0];
+                  const versionExists = ep?.episodeVersions?.some(v => v.type === wh.versionType);
+                  if (versionExists) {
+                    targetVersionType = wh.versionType;
+                  }
+                }
+              }
+
+              // Pre-populate progress in localStorage from database so VideoPlayerCore can resume it
+              if (wh.watchTime > 10) {
+                const epIdForStorage = targetEpisodeId ?? 'movie';
+                const versionTypeForStorage = targetVersionType || (data.episodes?.find(e => e.id === targetEpisodeId)?.episodeVersions?.[0]?.type || '');
+                const storageKey = `${user?.username || 'guest'}-${id}-${epIdForStorage}-${versionTypeForStorage}`;
+                
+                const localProgress = parseFloat(localStorage.getItem(`cinehub-progress-${storageKey}`) || '0');
+                if (localProgress < wh.watchTime) {
+                  localStorage.setItem(`cinehub-progress-${storageKey}`, String(wh.watchTime));
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Failed to get watch history for resume:', err);
+          }
+        }
+
+        if (targetEpisodeId) {
+          setSelectedEpisodeId(targetEpisodeId);
+          setSelectedVersionType(targetVersionType);
+        }
+      } catch (err) {
+        console.error('Failed to load movie data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [id, episodeParam, isAuthenticated, user]);
 
   // Get current episode and video URL
   const currentEpisode = movie?.episodes?.find(e => e.id === selectedEpisodeId);
@@ -308,48 +362,63 @@ export default function VideoPlayer() {
       {/* Video Area */}
       <div className="flex-1 min-h-0 relative overflow-hidden">
         {isAdPlaying ? (
-          <div className="absolute inset-0 bg-black flex items-center justify-center">
-            {/* Quảng cáo UI */}
-            <div className="absolute inset-0 z-10 pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
-            
-            <div className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full border border-gray-600/50 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-              <span className="text-sm font-medium text-gray-200">Quảng cáo tài trợ</span>
-            </div>
-
-            <video 
-              src={demoAdUrl} 
-              autoPlay 
-              muted={false} // Có thể set true nếu muốn mute mặc định
+          <div className="absolute inset-0 bg-black">
+            {/* Video quảng cáo */}
+            <video
+              src={demoAdUrl}
+              autoPlay
               className="w-full h-full object-contain"
               onEnded={() => setIsAdPlaying(false)}
             />
 
-            <div className="absolute bottom-16 right-8 z-20">
-              <Button
-                variant={adTimeLeft > 0 ? "secondary" : "default"}
-                className={`gap-2 text-sm font-medium rounded-full shadow-lg transition-all px-6 py-5 ${
-                  adTimeLeft > 0 
-                    ? 'bg-black/80 hover:bg-black/80 text-gray-400 cursor-not-allowed border border-gray-700/50' 
-                    : 'bg-white hover:bg-gray-200 text-black border border-white hover:scale-105'
-                }`}
+            {/* Gradient overlay — top & bottom để nội dung UI dễ đọc */}
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/70 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+
+            {/* Top-left: badge Quảng cáo */}
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full border border-yellow-500/40 backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+              <span className="text-xs font-semibold text-yellow-300 tracking-wide uppercase">Quảng cáo</span>
+            </div>
+
+            {/* Bottom area: skip button + upsell */}
+            <div className="absolute bottom-0 inset-x-0 z-20 px-4 pb-4 flex flex-col items-end gap-3">
+              {/* Skip button */}
+              <button
                 disabled={adTimeLeft > 0}
                 onClick={() => setIsAdPlaying(false)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border backdrop-blur-md transition-all duration-300 ${
+                  adTimeLeft > 0
+                    ? 'bg-black/70 border-gray-600/60 text-gray-400 cursor-not-allowed'
+                    : 'bg-white/95 border-white text-black hover:bg-white hover:scale-105 shadow-lg shadow-black/30 cursor-pointer'
+                }`}
               >
                 {adTimeLeft > 0 ? (
-                  `Bỏ qua sau ${adTimeLeft}s`
+                  <>
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-gray-500 text-xs font-bold text-gray-300">
+                      {adTimeLeft}
+                    </span>
+                    Bỏ qua quảng cáo
+                  </>
                 ) : (
                   <>
-                    Bỏ qua quảng cáo <Play className="w-4 h-4 ml-1" />
+                    <Play className="w-4 h-4 fill-black" />
+                    Bỏ qua quảng cáo
                   </>
                 )}
-              </Button>
-            </div>
-            
-            <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center">
-              <p className="text-gray-400 text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-md cursor-pointer hover:text-white transition-colors">
-                Nâng cấp Premium để không bao giờ phải xem quảng cáo
-              </p>
+              </button>
+
+              {/* Premium upsell */}
+              <div
+                className="w-full flex items-center justify-between gap-3 bg-gradient-to-r from-yellow-950/60 to-amber-900/40 border border-yellow-600/30 rounded-xl px-4 py-2.5 backdrop-blur-md cursor-pointer hover:border-yellow-500/60 transition-colors"
+                onClick={() => navigate('/subscription')}
+              >
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                  <span className="text-xs text-gray-300">Nâng cấp <span className="text-yellow-400 font-semibold">Premium</span> để xem phim không quảng cáo</span>
+                </div>
+                <span className="text-xs text-yellow-400 font-medium whitespace-nowrap flex-shrink-0">Xem ngay →</span>
+              </div>
             </div>
           </div>
         ) : videoUrl ? (

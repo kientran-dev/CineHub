@@ -17,6 +17,9 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,7 @@ public class MovieService {
     ActorRepository actorRepository;
 
     @Transactional
+    @CacheEvict(value = {"movieList", "popularMovies"}, allEntries = true)
     public MovieResponse createMovie(MovieRequest request) {
         Movie movie = Movie.builder()
                 .title(request.getTitle())
@@ -65,12 +69,14 @@ public class MovieService {
         return mapToResponse(movie);
     }
 
+    @Cacheable(value = "movieDetail", key = "#id")
     public MovieResponse getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movie not found"));
         return mapToResponse(movie);
     }
 
+    @Cacheable(value = "movieList", key = "'all'")
     public List<MovieResponse> getAllMovies() {
         return movieRepository.findAll().stream()
                 .map(this::mapToResponse)
@@ -78,6 +84,10 @@ public class MovieService {
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "movieDetail", key = "#id"),
+        @CacheEvict(value = {"movieList", "popularMovies"}, allEntries = true)
+    })
     public MovieResponse updateMovie(Long id, MovieRequest request) {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movie not found"));
@@ -115,6 +125,10 @@ public class MovieService {
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "movieDetail", key = "#id"),
+        @CacheEvict(value = {"movieList", "popularMovies"}, allEntries = true)
+    })
     public void deleteMovie(Long id) {
         if (!movieRepository.existsById(id)) {
             throw new RuntimeException("Movie not found");
@@ -178,7 +192,7 @@ public class MovieService {
                     .map(a -> ActorResponse.builder()
                             .id(a.getId())
                             .fullName(a.getFullName())
-                            .imageUrl(a.getImageUrl())
+                            .imageUrl(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(a.getImageUrl()))
                             .build())
                     .collect(Collectors.toList());
         }
@@ -187,8 +201,8 @@ public class MovieService {
                 .id(movie.getId())
                 .title(movie.getTitle())
                 .englishTitle(movie.getEnglishTitle())
-                .thumbnail(movie.getThumbnail())
-                .poster(movie.getPoster())
+                .thumbnail(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(movie.getThumbnail()))
+                .poster(com.kientran.cinehub.util.UrlUtils.fixTmdbUrl(movie.getPoster()))
                 .description(movie.getDescription())
                 .director(movie.getDirector())
                 .releaseYear(movie.getReleaseYear())

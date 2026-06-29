@@ -54,11 +54,11 @@ export default function MovieDetail() {
 
     favoriteService.getFavorites()
       .then(favs => setIsFavorite(favs.some(f => f.movieId === Number(id))))
-      .catch(() => {});
+      .catch(() => { });
 
     ratingService.getMyRating(id)
       .then(r => { if (r) setUserRating(Math.round(r.score / 2)); })
-      .catch(() => {});
+      .catch(() => { });
   }, [isAuthenticated, id]);
 
   const handleToggleFavorite = async () => {
@@ -150,54 +150,58 @@ export default function MovieDetail() {
         <Header />
 
         {/* Backdrop */}
-        <div className="relative h-[60vh] overflow-hidden">
+        <div className="relative h-[35vh] sm:h-[45vh] md:h-[50vh] lg:h-[60vh] overflow-hidden">
           <img
             src={movie.backdrop || movie.poster}
             alt={movie.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover select-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
         </div>
 
-        <div className="container mx-auto px-4 -mt-40 relative z-10 pb-12">
-          <div className="flex flex-col lg:flex-row gap-8">
+        <div className="container mx-auto px-4 -mt-24 sm:-mt-32 md:-mt-40 lg:-mt-44 relative z-10 pb-12">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             {/* Poster */}
-            <div className="flex-shrink-0">
-              <img src={movie.poster} alt={movie.title} className="w-64 rounded-lg shadow-2xl" />
+            <div className="flex-shrink-0 w-44 sm:w-52 md:w-60 lg:w-64">
+              <img 
+                src={movie.poster} 
+                alt={movie.title} 
+                className="w-full rounded-xl shadow-2xl border-2 border-gray-800/80 transform transition-transform duration-300 hover:scale-105" 
+              />
             </div>
 
             {/* Info */}
-            <div className="flex-1 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-4xl font-bold">{movie.title}</h1>
+            <div className="flex-1 space-y-4 text-center md:text-left w-full">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{movie.title}</h1>
                   {movie.englishTitle && (
-                    <p className="text-xl text-gray-400 mt-1">{movie.englishTitle}</p>
+                    <p className="text-base sm:text-lg md:text-xl text-gray-400 mt-1">{movie.englishTitle}</p>
                   )}
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
                     {movie.isPremium && (
-                      <div className="inline-flex items-center gap-1 rounded bg-yellow-600 px-3 py-1 text-sm">
+                      <div className="inline-flex items-center gap-1 rounded bg-yellow-600 px-3 py-1 text-xs sm:text-sm font-medium">
                         <Crown className="h-4 w-4" />
                         Nội dung Premium
                       </div>
                     )}
                     {movie.subtitleType === 'vietsub' && (
-                      <Badge className="bg-gray-700 text-white">Vietsub</Badge>
+                      <Badge className="bg-gray-700 text-white text-xs">Vietsub</Badge>
                     )}
                     {movie.subtitleType === 'thuyetminh' && (
-                      <Badge className="bg-gray-700 text-white">Thuyết minh</Badge>
+                      <Badge className="bg-gray-700 text-white text-xs">Thuyết minh</Badge>
                     )}
                     {movie.subtitleType === 'longtieng' && (
-                      <Badge className="bg-gray-700 text-white">Lồng tiếng</Badge>
+                      <Badge className="bg-gray-700 text-white text-xs">Lồng tiếng</Badge>
                     )}
                   </div>
                 </div>
 
-                {/* Favorite button */}
+                {/* Favorite button (hidden on mobile, using the main button instead) */}
                 <Button
                   variant="outline"
                   size="icon"
-                  className={`border-gray-600 flex-shrink-0 ${isFavorite ? 'bg-red-600 border-red-600' : ''}`}
+                  className={`border-gray-600 flex-shrink-0 hidden md:inline-flex ${isFavorite ? 'bg-red-600 border-red-600' : ''}`}
                   onClick={handleToggleFavorite}
                   disabled={favoriteLoading}
                 >
@@ -209,9 +213,9 @@ export default function MovieDetail() {
               </div>
 
               {/* Meta */}
-              <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs sm:text-sm">
                 {apiMovie.imdbScore && (
-                  <div className="flex items-center gap-1 bg-yellow-500 px-2 py-1 rounded">
+                  <div className="flex items-center gap-1 bg-yellow-500 px-2 py-0.5 rounded">
                     <span className="font-bold text-black">IMDb</span>
                     <span className="font-bold text-black">{apiMovie.imdbScore.toFixed(1)}</span>
                   </div>
@@ -247,21 +251,21 @@ export default function MovieDetail() {
               </div>
 
               {/* Description */}
-              <p className="text-gray-300 leading-relaxed">{apiMovie.description}</p>
+              <p className="text-gray-300 leading-relaxed text-sm sm:text-base max-w-4xl mx-auto md:mx-0">{apiMovie.description}</p>
 
               {/* Genres */}
               {genreNames && (
-                <div>
+                <div className="text-sm sm:text-base">
                   <span className="text-gray-400">Thể loại: </span>
-                  <span>{genreNames}</span>
+                  <span className="text-gray-200">{genreNames}</span>
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
                 <Button
                   size="lg"
-                  className="gap-2 bg-red-600 hover:bg-red-700"
+                  className="gap-2 bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                   onClick={() => {
                     if (!isAuthenticated) {
                       navigate('/auth', { state: { from: `/watch/${movie.id}` } });
@@ -277,7 +281,7 @@ export default function MovieDetail() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className={`gap-2 border-gray-600 ${isFavorite ? 'bg-red-600/20 border-red-600 text-red-500' : ''}`}
+                  className={`gap-2 border-gray-600 w-full sm:w-auto ${isFavorite ? 'bg-red-600/20 border-red-600 text-red-500' : ''}`}
                   onClick={handleToggleFavorite}
                   disabled={favoriteLoading}
                 >
@@ -286,7 +290,7 @@ export default function MovieDetail() {
                 </Button>
 
                 {/* Star rating */}
-                <div className="flex items-center gap-1 border border-gray-600 rounded-lg px-4 h-11">
+                <div className="flex items-center justify-center gap-1 border border-gray-600 rounded-lg px-4 h-11 w-full sm:w-auto">
                   <span className="text-sm text-gray-400 mr-1">Đánh giá:</span>
                   {[1, 2, 3, 4, 5].map(r => (
                     <button
@@ -297,11 +301,10 @@ export default function MovieDetail() {
                       className="transition-transform hover:scale-110"
                     >
                       <Star
-                        className={`h-5 w-5 transition-colors ${
-                          r <= (hoverRating || userRating)
+                        className={`h-5 w-5 transition-colors ${r <= (hoverRating || userRating)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-600'
-                        }`}
+                          }`}
                       />
                     </button>
                   ))}
@@ -313,15 +316,15 @@ export default function MovieDetail() {
                 </div>
 
                 {apiMovie.trailerUrl && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="gap-2 border-gray-600 hover:bg-red-900/20 hover:border-red-500 hover:text-red-400"
-                  onClick={() => setTrailerOpen(true)}
-                >
-                  <Youtube className="h-5 w-5 text-red-500" />
-                  Xem Trailer
-                </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="gap-2 border-gray-600 hover:bg-red-900/20 hover:border-red-500 hover:text-red-400 w-full sm:w-auto"
+                    onClick={() => setTrailerOpen(true)}
+                  >
+                    <Youtube className="h-5 w-5 text-red-500" />
+                    Xem Trailer
+                  </Button>
                 )}
               </div>
             </div>
@@ -338,8 +341,8 @@ export default function MovieDetail() {
                       {actor.imageUrl
                         ? <img src={actor.imageUrl} alt={actor.fullName} className="w-full h-full object-cover" />
                         : <div className="w-full h-full flex items-center justify-center text-xl font-bold text-gray-400">
-                            {actor.fullName?.charAt(0)}
-                          </div>
+                          {actor.fullName?.charAt(0)}
+                        </div>
                       }
                     </div>
                     <p className="text-sm font-medium text-center whitespace-nowrap">{actor.fullName}</p>

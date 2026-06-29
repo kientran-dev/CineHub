@@ -50,10 +50,9 @@ public class RatingService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Rating rating = ratingRepository.findByUserIdAndMovieId(user.getId(), movieId)
-                .orElseThrow(() -> new RuntimeException("Rating not found"));
-
-        return mapToResponse(rating);
+        return ratingRepository.findByUserIdAndMovieId(user.getId(), movieId)
+                .map(this::mapToResponse)
+                .orElse(null);
     }
 
     @Transactional
