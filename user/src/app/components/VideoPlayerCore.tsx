@@ -171,7 +171,29 @@ export default function VideoPlayerCore({
       setPlaying(false);
       onEnded?.();
     };
-    const onFsChange = () => setFullscreen(!!document.fullscreenElement);
+    const onFsChange = () => {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      setFullscreen(isFs);
+      if (!isFs) {
+        if (screen.orientation && (screen.orientation as any).unlock) {
+          try {
+            (screen.orientation as any).unlock();
+          } catch (e) {}
+        }
+      }
+    };
+    const onWebkitFsChange = () => {
+      setFullscreen(!!(document as any).webkitFullscreenElement);
+    };
+    const onVideoEnterFs = () => setFullscreen(true);
+    const onVideoExitFs = () => {
+      setFullscreen(false);
+      if (screen.orientation && (screen.orientation as any).unlock) {
+        try {
+          (screen.orientation as any).unlock();
+        } catch (e) {}
+      }
+    };
     const onVolumeChange = () => {
       setVolume(video.volume);
       setMuted(video.muted);
@@ -187,6 +209,9 @@ export default function VideoPlayerCore({
     video.addEventListener('ended', onEnded2);
     video.addEventListener('volumechange', onVolumeChange);
     document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onWebkitFsChange);
+    video.addEventListener('webkitbeginfullscreen', onVideoEnterFs);
+    video.addEventListener('webkitendfullscreen', onVideoExitFs);
 
     return () => {
       video.removeEventListener('play', onPlay);
@@ -199,6 +224,9 @@ export default function VideoPlayerCore({
       video.removeEventListener('ended', onEnded2);
       video.removeEventListener('volumechange', onVolumeChange);
       document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onWebkitFsChange);
+      video.removeEventListener('webkitbeginfullscreen', onVideoEnterFs);
+      video.removeEventListener('webkitendfullscreen', onVideoExitFs);
     };
   }, [onEnded, storageKey]);
 
@@ -311,11 +339,46 @@ export default function VideoPlayerCore({
 
   const toggleFullscreen = async () => {
     const el = containerRef.current;
-    if (!el) return;
+    const video = videoRef.current;
+    if (!el || !video) return;
+
+    // Detect iOS (iPhone/iPad/iPod)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      if ((video as any).webkitEnterFullscreen) {
+        try {
+          if ((video as any).webkitDisplayingFullscreen) {
+            (video as any).webkitExitFullscreen?.();
+          } else {
+            (video as any).webkitEnterFullscreen();
+          }
+        } catch (e) {
+          console.warn("iOS Fullscreen error:", e);
+        }
+      }
+      return;
+    }
+
     if (!document.fullscreenElement) {
-      await el.requestFullscreen();
+      try {
+        await el.requestFullscreen();
+        if (screen.orientation && (screen.orientation as any).lock) {
+          await (screen.orientation as any).lock('landscape').catch(() => {});
+        }
+      } catch (err) {
+        console.warn("Fullscreen/Orientation error:", err);
+      }
     } else {
-      await document.exitFullscreen();
+      try {
+        await document.exitFullscreen();
+        if (screen.orientation && (screen.orientation as any).unlock) {
+          (screen.orientation as any).unlock();
+        }
+      } catch (err) {
+        console.warn("Exit fullscreen error:", err);
+      }
     }
   };
 

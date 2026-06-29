@@ -33,7 +33,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // 1. PUBLIC: Ai cũng có quyền truy cập
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/payments/vnpay-return", "/actuator/health").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/payments/vnpay-return", "/actuator/health", "/actuator/prometheus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/genres/**", "/api/v1/actors/**", "/api/v1/episodes/**", "/api/v1/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/recommendations/similar/**").permitAll()
 
