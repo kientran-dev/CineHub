@@ -127,14 +127,14 @@ export default function MoviesManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-gray-800">Quản lý phim</h1>
           <p className="text-gray-600 mt-1">Quản lý toàn bộ phim trên nền tảng</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
         >
           <Plus size={18} />
           Thêm phim mới
@@ -287,7 +287,7 @@ export default function MoviesManagement() {
 
             {activeTab === 'info' ? (
               <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tên phim *</label>
                     <input required value={form.title || ''} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
@@ -321,7 +321,7 @@ export default function MoviesManagement() {
                     placeholder="Nhập mô tả nội dung phim..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Đạo diễn</label>
                     <input value={form.director || ''} onChange={e => setForm(p => ({ ...p, director: e.target.value }))}
@@ -344,7 +344,7 @@ export default function MoviesManagement() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Năm phát hành</label>
                     <input type="number" value={form.releaseYear || ''} onChange={e => setForm(p => ({ ...p, releaseYear: Number(e.target.value) }))}
@@ -370,7 +370,7 @@ export default function MoviesManagement() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Thời lượng (phút)</label>
                     <input type="number" min="1" value={form.duration || ''} onChange={e => setForm(p => ({ ...p, duration: Number(e.target.value) }))}

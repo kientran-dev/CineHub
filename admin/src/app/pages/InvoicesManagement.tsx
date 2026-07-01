@@ -492,7 +492,7 @@ function StatusUpdateModal({ invoice, onClose, onSuccess }: StatusModalProps) {
             {/* Status selector */}
             <div className="mb-5">
               <p className="text-sm font-medium text-gray-700 mb-3">Chuyển sang trạng thái:</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={() => setNewStatus('SUCCESS')}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${newStatus === 'SUCCESS'
@@ -610,30 +610,30 @@ export default function InvoicesManagement() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-gray-800">Quản lý hóa đơn</h1>
           <p className="text-gray-500 mt-1 text-sm">Xem và quản lý tất cả giao dịch thanh toán</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
           <button
             onClick={fetchInvoices}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
           >
             <RefreshCw size={16} />
             Làm mới
           </button>
           <button
             onClick={() => printInvoiceReport(filteredInvoices)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
-            title="In báo cáo giao dịch dạng PDF"
+            className="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
+            title="In báo dịch vụ dạng PDF"
           >
             <Printer size={16} />
             In báo cáo
           </button>
           <button
             onClick={() => exportToExcel(filteredInvoices)}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+            className="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
             title="Xuất báo cáo Excel (.xlsx) đẹp với 3 sheet: Chi tiết, Tổng hợp theo gói, Thống kê trạng thái"
           >
             <FileSpreadsheet size={16} />
@@ -853,7 +853,7 @@ export default function InvoicesManagement() {
               </div>
 
               {/* Fields */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { label: 'Mã giao dịch', value: `#${selectedInvoice.paymentId}` },
                   { label: 'Ngày thanh toán', value: fmtDate(selectedInvoice.paymentDate) },
@@ -868,7 +868,7 @@ export default function InvoicesManagement() {
               </div>
 
               {/* Payment method + status */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-xl p-3">
                   <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">Phương thức</p>
                   <VNPayBadge />

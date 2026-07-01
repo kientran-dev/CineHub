@@ -290,7 +290,7 @@ export default function AccountsManagement() {
             {/* Role Selection */}
             <div className="mb-5">
               <p className="text-sm font-medium text-gray-700 mb-3">Chọn vai trò mới:</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={() => handleRoleClick(roleModalAccount, false)}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${

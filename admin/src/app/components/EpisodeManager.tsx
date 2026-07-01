@@ -276,7 +276,7 @@ export default function EpisodeManager({ movieId, movieType }: EpisodeManagerPro
         {/* ── Mode: Thêm đơn lẻ ─────────────────────────────────── */}
         {mode === 'single' && (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {!isSingle && (
                 <>
                   <div className="flex flex-col justify-end">
