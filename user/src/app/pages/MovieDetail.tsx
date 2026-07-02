@@ -253,6 +253,14 @@ export default function MovieDetail() {
               {/* Description */}
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base max-w-4xl mx-auto md:mx-0">{apiMovie.description}</p>
 
+              {/* Director */}
+              {apiMovie.director && (
+                <div className="text-sm sm:text-base">
+                  <span className="text-gray-400">Đạo diễn: </span>
+                  <span className="text-gray-200">{apiMovie.director}</span>
+                </div>
+              )}
+
               {/* Genres */}
               {genreNames && (
                 <div className="text-sm sm:text-base">
